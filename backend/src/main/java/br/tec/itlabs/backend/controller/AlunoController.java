@@ -31,6 +31,13 @@ public class AlunoController {
                 .body(AlunoResponseDto.fromEntity(aluno));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<AlunoResponseDto> buscarPorId(@PathVariable Long id) {
+        Aluno aluno = alunoService.buscarPorId(id);
+
+        return ResponseEntity.ok(AlunoResponseDto.fromEntity(aluno));
+    }
+
     @GetMapping
     public ResponseEntity<List<AlunoResponseDto>> listar() {
         List<AlunoResponseDto> alunos = alunoService.listar()
