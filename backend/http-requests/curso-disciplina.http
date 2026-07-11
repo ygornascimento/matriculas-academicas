@@ -1,0 +1,95 @@
+@baseUrl = http://localhost:8080
+
+# Ajuste estes IDs conforme os cursos e disciplinas existentes no seu banco.
+# Use GET /api/cursos e GET /api/disciplinas para conferir.
+@cursoId = 2
+@disciplinaId = 2
+@cursoDisciplinaId = 1
+
+
+### Listar cursos disponíveis
+GET {{baseUrl}}/api/cursos
+
+
+### Listar disciplinas disponíveis
+GET {{baseUrl}}/api/disciplinas
+
+
+### Listar associações entre cursos e disciplinas
+GET {{baseUrl}}/api/curso-disciplinas
+
+
+### Associar disciplina ao curso
+POST {{baseUrl}}/api/curso-disciplinas
+Content-Type: application/json
+
+{
+  "cursoId": {{cursoId}},
+  "disciplinaId": {{disciplinaId}}
+}
+
+
+### Associar a mesma disciplina ao mesmo curso — deve retornar erro de regra de negócio
+POST {{baseUrl}}/api/curso-disciplinas
+Content-Type: application/json
+
+{
+  "cursoId": {{cursoId}},
+  "disciplinaId": {{disciplinaId}}
+}
+
+
+### Buscar associação por ID
+GET {{baseUrl}}/api/curso-disciplinas/{{cursoDisciplinaId}}
+
+
+### Associar com curso inexistente — deve retornar 404
+POST {{baseUrl}}/api/curso-disciplinas
+Content-Type: application/json
+
+{
+  "cursoId": 999,
+  "disciplinaId": {{disciplinaId}}
+}
+
+
+### Associar com disciplina inexistente — deve retornar 404
+POST {{baseUrl}}/api/curso-disciplinas
+Content-Type: application/json
+
+{
+  "cursoId": {{cursoId}},
+  "disciplinaId": 999
+}
+
+
+### Associar com curso nulo — deve retornar erro de validação
+POST {{baseUrl}}/api/curso-disciplinas
+Content-Type: application/json
+
+{
+  "cursoId": null,
+  "disciplinaId": {{disciplinaId}}
+}
+
+
+### Associar com disciplina nula — deve retornar erro de validação
+POST {{baseUrl}}/api/curso-disciplinas
+Content-Type: application/json
+
+{
+  "cursoId": {{cursoId}},
+  "disciplinaId": null
+}
+
+
+### Buscar associação inexistente — deve retornar 404
+GET {{baseUrl}}/api/curso-disciplinas/999
+
+
+### Remover associação
+DELETE {{baseUrl}}/api/curso-disciplinas/{{cursoDisciplinaId}}
+
+
+### Listar associações após remoção
+GET {{baseUrl}}/api/curso-disciplinas
