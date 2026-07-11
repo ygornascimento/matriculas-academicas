@@ -1,0 +1,69 @@
+@baseUrl = http://localhost:8080
+
+### Listar alunos
+GET {{baseUrl}}/api/alunos
+
+
+### Criar aluno
+POST {{baseUrl}}/api/alunos
+Content-Type: application/json
+
+{
+  "nome": "João Silva",
+  "email": "joao.silva@email.com"
+}
+
+
+### Buscar aluno por ID
+GET {{baseUrl}}/api/alunos/2
+
+
+### Atualizar aluno
+PUT {{baseUrl}}/api/alunos/2
+Content-Type: application/json
+
+{
+  "nome": "João Silva Atualizado",
+  "email": "joao.atualizado@email.com"
+}
+
+### Criar aluno com e-mail duplicado — deve retornar erro
+POST {{baseUrl}}/api/alunos
+Content-Type: application/json
+
+{
+  "nome": "Outro João",
+  "email": "joao.silva@email.com"
+}
+
+
+### Excluir aluno
+DELETE {{baseUrl}}/api/alunos/2
+
+
+### Listar alunos após exclusão
+GET {{baseUrl}}/api/alunos
+
+
+### Criar aluno com nome vazio — deve retornar erro de validação
+POST {{baseUrl}}/api/alunos
+Content-Type: application/json
+
+{
+  "nome": "",
+  "email": "aluno.sem.nome@email.com"
+}
+
+
+### Criar aluno com e-mail inválido — deve retornar erro de validação
+POST {{baseUrl}}/api/alunos
+Content-Type: application/json
+
+{
+  "nome": "Aluno Email Inválido",
+  "email": "email-invalido"
+}
+
+
+### Buscar aluno inexistente — deve retornar erro
+GET {{baseUrl}}/api/alunos/999
