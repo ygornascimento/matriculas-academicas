@@ -13,6 +13,15 @@ Content-Type: application/json
   "email": "joao.silva@email.com"
 }
 
+### Criar segundo aluno
+POST {{baseUrl}}/api/alunos
+Content-Type: application/json
+
+{
+  "nome": "Maria Souza",
+  "email": "maria.souza@email.com"
+}
+
 
 ### Buscar aluno por ID
 GET {{baseUrl}}/api/alunos/2
@@ -25,6 +34,24 @@ Content-Type: application/json
 {
   "nome": "João Silva Atualizado",
   "email": "joao.atualizado@email.com"
+}
+
+### Atualizar aluno mantendo o mesmo e-mail — deve permitir
+PUT {{baseUrl}}/api/alunos/3
+Content-Type: application/json
+
+{
+  "nome": "João Silva Mesmo Email",
+  "email": "joao.silva@email.com"
+}
+
+### Atualizar aluno usando e-mail de outro aluno — deve retornar erro
+PUT {{baseUrl}}/api/alunos/3
+Content-Type: application/json
+
+{
+  "nome": "João Silva",
+  "email": "maria.souza@email.com"
 }
 
 ### Criar aluno com e-mail duplicado — deve retornar erro
