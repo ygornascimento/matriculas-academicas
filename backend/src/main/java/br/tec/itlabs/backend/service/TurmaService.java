@@ -26,6 +26,10 @@ public class TurmaService {
 
     @Transactional
     public Turma criar(Long cursoDisciplinaId, String codigo, String periodo, Integer limiteVagas) {
+        if (turmaRepository.existsByCodigo(codigo)) {
+            throw new RegraDeNegocioException("Já existe uma turma cadastrada com este código.");
+        }
+
         CursoDisciplina cursoDisciplina = buscarCursoDisciplinaPorId(cursoDisciplinaId);
 
         Turma turma = new Turma(cursoDisciplina, codigo, periodo, limiteVagas);
@@ -46,11 +50,16 @@ public class TurmaService {
     @Transactional
     public Turma atualizar(Long id, Long cursoDisciplinaId, String codigo, String periodo, Integer limiteVagas) {
         Turma turma = buscarPorId(id);
-        CursoDisciplina cursoDisciplina = buscarCursoDisciplinaPorId(cursoDisciplinaId);
+
+        if (turmaRepository.existsByCodigoAndIdNot(codigo, id)) {
+            throw new RegraDeNegocioException("Já existe outra turma cadastrada com este código.");
+        }
 
         if (limiteVagas < turma.getVagasOcupadas()) {
             throw new RegraDeNegocioException("O limite de vagas não pode ser menor que as vagas já ocupadas.");
         }
+        
+        CursoDisciplina cursoDisciplina = buscarCursoDisciplinaPorId(cursoDisciplinaId);
 
         turma.alterarDados(cursoDisciplina, codigo, periodo, limiteVagas);
         return turmaRepository.save(turma);
