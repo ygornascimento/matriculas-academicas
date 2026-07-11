@@ -2,6 +2,7 @@ package br.tec.itlabs.backend.service;
 
 import br.tec.itlabs.backend.entity.Disciplina;
 import br.tec.itlabs.backend.exception.RecursoNaoEncontradoException;
+import br.tec.itlabs.backend.exception.RegraDeNegocioException;
 import br.tec.itlabs.backend.repository.DisciplinaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,9 @@ public class DisciplinaService {
 
     @Transactional
     public Disciplina criar(String nome, Integer cargaHoraria) {
+        if (disciplinaRepository.existsByNome(nome)) {
+            throw new RegraDeNegocioException("Já existe uma disciplina cadastrada com este nome.");
+        }
         Disciplina disciplina = new Disciplina(nome, cargaHoraria);
         return disciplinaRepository.save(disciplina);
     }
@@ -37,6 +41,9 @@ public class DisciplinaService {
     @Transactional
     public Disciplina atualizar(Long id, String nome, Integer cargaHoraria) {
         Disciplina disciplina = buscarPorId(id);
+        if (disciplinaRepository.existsByNomeAndIdNot(nome, id)) {
+            throw new RegraDeNegocioException("Já existe outra disciplina cadastrada com este nome.");
+        }
         disciplina.alterarDados(nome, cargaHoraria);
         return disciplinaRepository.save(disciplina);
     }
