@@ -1,0 +1,182 @@
+@baseUrl = http://localhost:8080
+
+# Ajuste estes IDs conforme os dados existentes no banco.
+# Use GET /api/curso-disciplinas para conferir.
+@cursoDisciplinaId = 1
+@turmaId = 1
+
+
+### Listar associações entre cursos e disciplinas disponíveis
+GET {{baseUrl}}/api/curso-disciplinas
+
+
+### Listar turmas
+GET {{baseUrl}}/api/turmas
+
+
+### Criar turma
+POST {{baseUrl}}/api/turmas
+Content-Type: application/json
+
+{
+  "cursoDisciplinaId": {{cursoDisciplinaId}},
+  "codigo": "SI-BD-2026-1",
+  "periodo": "2026.1",
+  "limiteVagas": 2
+}
+
+
+### Criar turma com código duplicado — deve retornar erro de regra de negócio
+POST {{baseUrl}}/api/turmas
+Content-Type: application/json
+
+{
+  "cursoDisciplinaId": {{cursoDisciplinaId}},
+  "codigo": "SI-BD-2026-1",
+  "periodo": "2026.1",
+  "limiteVagas": 2
+}
+
+
+### Buscar turma por ID
+GET {{baseUrl}}/api/turmas/{{turmaId}}
+
+
+### Atualizar turma mantendo o mesmo código — deve permitir
+PUT {{baseUrl}}/api/turmas/{{turmaId}}
+Content-Type: application/json
+
+{
+  "cursoDisciplinaId": {{cursoDisciplinaId}},
+  "codigo": "SI-BD-2026-1",
+  "periodo": "2026.1",
+  "limiteVagas": 3
+}
+
+
+### Criar segunda turma
+POST {{baseUrl}}/api/turmas
+Content-Type: application/json
+
+{
+  "cursoDisciplinaId": {{cursoDisciplinaId}},
+  "codigo": "SI-BD-2026-2",
+  "periodo": "2026.2",
+  "limiteVagas": 2
+}
+
+
+### Atualizar turma usando código de outra turma — deve retornar erro de regra de negócio
+PUT {{baseUrl}}/api/turmas/{{turmaId}}
+Content-Type: application/json
+
+{
+  "cursoDisciplinaId": {{cursoDisciplinaId}},
+  "codigo": "SI-BD-2026-2",
+  "periodo": "2026.1",
+  "limiteVagas": 3
+}
+
+
+### Atualizar turma
+PUT {{baseUrl}}/api/turmas/{{turmaId}}
+Content-Type: application/json
+
+{
+  "cursoDisciplinaId": {{cursoDisciplinaId}},
+  "codigo": "SI-BD-2026-1-ATUALIZADA",
+  "periodo": "2026.1",
+  "limiteVagas": 4
+}
+
+
+### Fechar turma
+PATCH {{baseUrl}}/api/turmas/{{turmaId}}/fechar
+
+
+### Abrir turma
+PATCH {{baseUrl}}/api/turmas/{{turmaId}}/abrir
+
+
+### Criar turma com associação inexistente — deve retornar 404
+POST {{baseUrl}}/api/turmas
+Content-Type: application/json
+
+{
+  "cursoDisciplinaId": 999,
+  "codigo": "TURMA-INEXISTENTE",
+  "periodo": "2026.1",
+  "limiteVagas": 2
+}
+
+
+### Criar turma com código vazio — deve retornar erro de validação
+POST {{baseUrl}}/api/turmas
+Content-Type: application/json
+
+{
+  "cursoDisciplinaId": {{cursoDisciplinaId}},
+  "codigo": "",
+  "periodo": "2026.1",
+  "limiteVagas": 2
+}
+
+
+### Criar turma com período vazio — deve retornar erro de validação
+POST {{baseUrl}}/api/turmas
+Content-Type: application/json
+
+{
+  "cursoDisciplinaId": {{cursoDisciplinaId}},
+  "codigo": "SI-TESTE-PERIODO",
+  "periodo": "",
+  "limiteVagas": 2
+}
+
+
+### Criar turma com limite de vagas nulo — deve retornar erro de validação
+POST {{baseUrl}}/api/turmas
+Content-Type: application/json
+
+{
+  "cursoDisciplinaId": {{cursoDisciplinaId}},
+  "codigo": "SI-TESTE-LIMITE-NULO",
+  "periodo": "2026.1",
+  "limiteVagas": null
+}
+
+
+### Criar turma com limite de vagas negativo — deve retornar erro de validação
+POST {{baseUrl}}/api/turmas
+Content-Type: application/json
+
+{
+  "cursoDisciplinaId": {{cursoDisciplinaId}},
+  "codigo": "SI-TESTE-LIMITE-NEGATIVO",
+  "periodo": "2026.1",
+  "limiteVagas": -1
+}
+
+
+### Buscar turma inexistente — deve retornar 404
+GET {{baseUrl}}/api/turmas/999
+
+
+### Atualizar turma inexistente — deve retornar 404
+PUT {{baseUrl}}/api/turmas/999
+Content-Type: application/json
+
+{
+  "cursoDisciplinaId": {{cursoDisciplinaId}},
+  "codigo": "TURMA-INEXISTENTE",
+  "periodo": "2026.1",
+  "limiteVagas": 2
+}
+
+
+### Excluir turma
+DELETE {{baseUrl}}/api/turmas/{{turmaId}}
+
+
+### Listar turmas após exclusão
+GET {{baseUrl}}/api/turmas
