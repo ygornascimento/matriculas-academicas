@@ -1,12 +1,9 @@
 package br.tec.itlabs.backend.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import java.time.Instant;
@@ -19,11 +16,7 @@ public class Disciplina {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "curso_id", nullable = false)
-    private Curso curso;
-
-    @Column(nullable = false, length = 150)
+    @Column(nullable = false, unique = true, length = 150)
     private String nome;
 
     @Column(name = "carga_horaria", nullable = false)
@@ -37,8 +30,7 @@ public class Disciplina {
 
     protected Disciplina() {}
 
-    public Disciplina(Curso curso, String nome, Integer cargaHoraria) {
-        this.curso = curso;
+    public Disciplina(String nome, Integer cargaHoraria) {
         this.nome = nome;
         this.cargaHoraria = cargaHoraria;
         this.criadoEm = Instant.now();
@@ -47,10 +39,6 @@ public class Disciplina {
 
     public Long getId() {
         return id;
-    }
-
-    public Curso getCurso() {
-        return curso;
     }
 
     public String getNome() {
@@ -69,8 +57,7 @@ public class Disciplina {
         return atualizadoEm;
     }
 
-    public void alterarDados(Curso curso, String nome, Integer cargaHoraria) {
-        this.curso = curso;
+    public void alterarDados(String nome, Integer cargaHoraria) {
         this.nome = nome;
         this.cargaHoraria = cargaHoraria;
         this.atualizadoEm = Instant.now();

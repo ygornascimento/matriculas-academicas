@@ -1,4 +1,5 @@
 package br.tec.itlabs.backend.entity;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -21,8 +22,8 @@ public class Turma {
     private Long id;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "disciplina_id", nullable = false)
-    private Disciplina disciplina;
+    @JoinColumn(name = "curso_disciplina_id", nullable = false)
+    private CursoDisciplina cursoDisciplina;
 
     @Column(nullable = false, unique = true, length = 50)
     private String codigo;
@@ -48,8 +49,8 @@ public class Turma {
 
     protected Turma() {}
 
-    public Turma(Disciplina disciplina, String codigo, String periodo, Integer limiteVagas) {
-        this.disciplina = disciplina;
+    public Turma(CursoDisciplina cursoDisciplina, String codigo, String periodo, Integer limiteVagas) {
+        this.cursoDisciplina = cursoDisciplina;
         this.codigo = codigo;
         this.periodo = periodo;
         this.limiteVagas = limiteVagas;
@@ -63,8 +64,8 @@ public class Turma {
         return id;
     }
 
-    public Disciplina getDisciplina() {
-        return disciplina;
+    public CursoDisciplina getCursoDisciplina() {
+        return cursoDisciplina;
     }
 
     public String getCodigo() {
@@ -131,8 +132,13 @@ public class Turma {
         this.atualizadoEm = Instant.now();
     }
 
-    public void alterarDados(Disciplina disciplina, String codigo, String periodo, Integer limiteVagas) {
-        this.disciplina = disciplina;
+    public void alterarDados(
+            CursoDisciplina cursoDisciplina,
+            String codigo,
+            String periodo,
+            Integer limiteVagas
+    ) {
+        this.cursoDisciplina = cursoDisciplina;
         this.codigo = codigo;
         this.periodo = periodo;
         this.limiteVagas = limiteVagas;

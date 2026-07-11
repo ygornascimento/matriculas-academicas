@@ -1,57 +1,74 @@
-create table alunos (
-    id bigserial primary key,
-    nome varchar(150) not null,
-    email varchar(150) not null,
-    criado_em timestamptz not null default current_timestamp,
-    atualizado_em timestamptz not null default current_timestamp,
+create table alunos
+(
+    id            bigserial primary key,
+    nome          varchar(150) not null,
+    email         varchar(150) not null,
+    criado_em     timestamptz  not null default current_timestamp,
+    atualizado_em timestamptz  not null default current_timestamp,
 
     constraint uk_alunos_email unique (email)
 );
 
-create table cursos (
-    id bigserial primary key,
-    nome varchar(150) not null,
-    descricao varchar(500),
-    criado_em timestamptz not null default current_timestamp,
-    atualizado_em timestamptz not null default current_timestamp,
+create table cursos
+(
+    id            bigserial primary key,
+    nome          varchar(150) not null,
+    descricao     varchar(500),
+    criado_em     timestamptz  not null default current_timestamp,
+    atualizado_em timestamptz  not null default current_timestamp,
 
     constraint uk_cursos_nome unique (nome)
 );
 
-create table disciplinas (
-     id bigserial primary key,
-     curso_id bigint not null,
-     nome varchar(150) not null,
-     carga_horaria integer not null,
-     criado_em timestamptz not null default current_timestamp,
-     atualizado_em timestamptz not null default current_timestamp,
+create table disciplinas
+(
+    id            bigserial primary key,
+    nome          varchar(150) not null,
+    carga_horaria integer      not null,
+    criado_em     timestamptz  not null default current_timestamp,
+    atualizado_em timestamptz  not null default current_timestamp,
 
-     constraint fk_disciplinas_curso
-         foreign key (curso_id)
-             references cursos (id),
+    constraint ck_disciplinas_carga_horaria_positiva
+        check (carga_horaria > 0),
 
-     constraint ck_disciplinas_carga_horaria_positiva
-         --protege o banco contra carga horária inválida.
-         check (carga_horaria > 0),
-
-     constraint uk_disciplinas_curso_nome
-         unique (curso_id, nome)
+    constraint uk_disciplinas_nome
+        unique (nome)
 );
 
-create table turmas (
-    id bigserial primary key,
-    disciplina_id bigint not null,
-    codigo varchar(50) not null,
-    periodo varchar(30) not null,
-    limite_vagas integer not null,
-    vagas_ocupadas integer not null default 0,
-    status varchar(20) not null,
-    criado_em timestamptz not null default current_timestamp,
-    atualizado_em timestamptz not null default current_timestamp,
+create table curso_disciplinas
+(
+    id            bigserial primary key,
+    curso_id      bigint      not null,
+    disciplina_id bigint      not null,
+    criado_em     timestamptz not null default current_timestamp,
 
-    constraint fk_turmas_disciplina
+    constraint fk_curso_disciplinas_curso
+        foreign key (curso_id)
+            references cursos (id),
+
+    constraint fk_curso_disciplinas_disciplina
         foreign key (disciplina_id)
             references disciplinas (id),
+
+    constraint uk_curso_disciplinas_curso_disciplina
+        unique (curso_id, disciplina_id)
+);
+
+create table turmas
+(
+    id                  bigserial primary key,
+    curso_disciplina_id bigint      not null,
+    codigo              varchar(50) not null,
+    periodo             varchar(30) not null,
+    limite_vagas        integer     not null,
+    vagas_ocupadas      integer     not null default 0,
+    status              varchar(20) not null,
+    criado_em           timestamptz not null default current_timestamp,
+    atualizado_em       timestamptz not null default current_timestamp,
+
+    constraint fk_turmas_curso_disciplina
+        foreign key (curso_disciplina_id)
+            references curso_disciplinas (id),
 
     constraint ck_turmas_limite_vagas_positivo
         check (limite_vagas > 0),
@@ -69,14 +86,15 @@ create table turmas (
         unique (codigo)
 );
 
-create table matriculas (
-    id bigserial primary key,
-    aluno_id bigint not null,
-    turma_id bigint not null,
-    status varchar(20) not null,
-    criado_em timestamptz not null default current_timestamp,
+create table matriculas
+(
+    id            bigserial primary key,
+    aluno_id      bigint      not null,
+    turma_id      bigint      not null,
+    status        varchar(20) not null,
+    criado_em     timestamptz not null default current_timestamp,
     confirmada_em timestamptz,
-    cancelada_em timestamptz,
+    cancelada_em  timestamptz,
 
     constraint fk_matriculas_aluno
         foreign key (aluno_id)
