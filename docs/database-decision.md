@@ -1,109 +1,429 @@
-# Decisões de Banco de Dados
+# Decisões de banco de dados — Matrículas Acadêmicas
 
-Projeto: Matrículas Acadêmicas
+Este documento registra as principais decisões de modelagem do banco de dados do projeto Matrículas Acadêmicas.
 
-Este documento registra as principais decisões da migration inicial do banco de dados. A intenção é manter rastreabilidade entre o enunciado do desafio, as regras de negócio e as constraints aplicadas no PostgreSQL.
+O objetivo é manter rastreabilidade entre o domínio, as regras de negócio e as constraints criadas na migration inicial com Flyway.
 
-## 1. Tabelas da migration inicial
+## Visão geral do modelo
 
-A migration `V1__create_initial_schema.sql` cria as tabelas mínimas necessárias para o domínio:
+O schema inicial foi modelado com as seguintes tabelas:
 
 - `alunos`
 - `cursos`
 - `disciplinas`
+- `curso_disciplinas`
 - `turmas`
 - `matriculas`
 
-Relacionamentos:
+A modelagem busca atender aos fluxos principais do desafio:
 
-- `disciplinas.curso_id` referencia `cursos.id`
-- `turmas.disciplina_id` referencia `disciplinas.id`
-- `matriculas.aluno_id` referencia `alunos.id`
-- `matriculas.turma_id` referencia `turmas.id`
+- cadastro de alunos;
+- cadastro de cursos;
+- cadastro de disciplinas;
+- associação de disciplinas a cursos;
+- cadastro de turmas;
+- matrícula de alunos em turmas;
+- confirmação e cancelamento de matrículas;
+- consulta de matrículas por aluno e por turma.
 
-## 2. Datas e horários
+## Decisão sobre Curso, Disciplina e CursoDisciplina
 
-Os campos técnicos de data e hora usam `timestamptz` no PostgreSQL. A decisão evita gravar horários sem contexto de fuso e deixa o registro mais adequado para representar instantes reais no tempo.
+Durante a modelagem, foi avaliada a possibilidade de uma disciplina pertencer diretamente a um curso.
 
-No Java, a recomendação é mapear esses campos como `Instant`.
+Essa alternativa foi descartada porque acoplaria uma disciplina a um único curso, o que não representa bem o domínio acadêmico. Uma disciplina como "Banco de Dados" pode fazer parte de diferentes cursos.
 
-```properties
-spring.jpa.properties.hibernate.jdbc.time_zone=UTC
+Por isso, a disciplina foi modelada como uma unidade curricular reutilizável.
+
+A associação entre curso e disciplina foi representada pela tabela `curso_disciplinas`.
+
+Assim:
+
+- `cursos` representa formações acadêmicas;
+- `disciplinas` representa unidades curriculares reutilizáveis;
+- `curso_disciplinas` representa que uma disciplina faz parte de um curso;
+- `turmas` representa a oferta de uma disciplina dentro de um curso;
+- `matriculas` representa o vínculo entre aluno e turma.
+
+## Ordem das tabelas na migration
+
+A ordem de criação das tabelas respeita as dependências entre elas:
+
+1. `alunos`
+2. `cursos`
+3. `disciplinas`
+4. `curso_disciplinas`
+5. `turmas`
+6. `matriculas`
+
+A tabela `curso_disciplinas` depende de `cursos` e `disciplinas`.
+
+A tabela `turmas` depende de `curso_disciplinas`.
+
+A tabela `matriculas` depende de `alunos` e `turmas`.
+
+## Datas e horários
+
+Os campos técnicos de data e hora usam o tipo `timestamptz` no PostgreSQL.
+
+Exemplo:
+
+```sql
+criado_em timestamptz not null default current_timestamp
 ```
 
-Campos envolvidos:
+Essa decisão foi tomada para representar instantes de tempo de forma mais segura, reduzindo ambiguidade de fuso horário.
 
+No Java, esses campos são mapeados como `Instant`.
+
+Exemplos:
+
+```java
+private Instant criadoEm;
+private Instant atualizadoEm;
+```
+
+Campos como `criado_em`, `atualizado_em`, `confirmada_em` e `cancelada_em` representam eventos técnicos do sistema, não datas acadêmicas de calendário.
+
+## Tabela alunos
+
+A tabela `alunos` representa pessoas que podem ser matriculadas em turmas.
+
+Campos principais:
+
+- `id`
+- `nome`
+- `email`
 - `criado_em`
 - `atualizado_em`
+
+Constraint principal:
+
+```sql
+constraint uk_alunos_email unique (email)
+```
+
+Essa constraint impede o cadastro de dois alunos com o mesmo e-mail.
+
+Essa regra também poderá ser tratada na camada de service para retornar mensagens mais claras na API, mas o banco funciona como proteção final da consistência.
+
+## Tabela cursos
+
+A tabela `cursos` representa formações acadêmicas.
+
+Campos principais:
+
+- `id`
+- `nome`
+- `descricao`
+- `criado_em`
+- `atualizado_em`
+
+Constraint principal:
+
+```sql
+constraint uk_cursos_nome unique (nome)
+```
+
+Essa constraint impede o cadastro de dois cursos com o mesmo nome.
+
+## Tabela disciplinas
+
+A tabela `disciplinas` representa unidades curriculares reutilizáveis.
+
+Campos principais:
+
+- `id`
+- `nome`
+- `carga_horaria`
+- `criado_em`
+- `atualizado_em`
+
+Constraints principais:
+
+```sql
+constraint ck_disciplinas_carga_horaria_positiva
+    check (carga_horaria > 0)
+```
+
+Essa constraint impede disciplinas com carga horária menor ou igual a zero.
+
+```sql
+constraint uk_disciplinas_nome
+    unique (nome)
+```
+
+Essa constraint impede duas disciplinas com o mesmo nome no catálogo.
+
+Nesta versão, o nome da disciplina é tratado como único globalmente para manter o cadastro simples. Em uma evolução futura, seria possível permitir nomes iguais com códigos diferentes ou estruturas mais complexas.
+
+## Tabela curso_disciplinas
+
+A tabela `curso_disciplinas` representa a associação entre curso e disciplina.
+
+Campos principais:
+
+- `id`
+- `curso_id`
+- `disciplina_id`
+- `criado_em`
+
+Constraints principais:
+
+```sql
+constraint fk_curso_disciplinas_curso
+    foreign key (curso_id)
+    references cursos (id)
+```
+
+Garante que a associação sempre aponte para um curso existente.
+
+```sql
+constraint fk_curso_disciplinas_disciplina
+    foreign key (disciplina_id)
+    references disciplinas (id)
+```
+
+Garante que a associação sempre aponte para uma disciplina existente.
+
+```sql
+constraint uk_curso_disciplinas_curso_disciplina
+    unique (curso_id, disciplina_id)
+```
+
+Impede associar a mesma disciplina duas vezes ao mesmo curso.
+
+Essa regra também é validada na camada de service antes de salvar a associação, permitindo uma mensagem mais clara para a API.
+
+## Tabela turmas
+
+A tabela `turmas` representa a oferta de uma disciplina dentro de um curso.
+
+A turma não aponta diretamente para `disciplinas`. Ela aponta para `curso_disciplinas`.
+
+Isso permite saber não apenas qual disciplina está sendo ofertada, mas também dentro de qual curso ela está sendo ofertada.
+
+Campos principais:
+
+- `id`
+- `curso_disciplina_id`
+- `codigo`
+- `periodo`
+- `limite_vagas`
+- `vagas_ocupadas`
+- `status`
+- `criado_em`
+- `atualizado_em`
+
+Constraint de relacionamento:
+
+```sql
+constraint fk_turmas_curso_disciplina
+    foreign key (curso_disciplina_id)
+    references curso_disciplinas (id)
+```
+
+Garante que toda turma esteja associada a uma disciplina dentro de um curso.
+
+Constraint de limite de vagas:
+
+```sql
+constraint ck_turmas_limite_vagas_positivo
+    check (limite_vagas > 0)
+```
+
+Impede turmas com limite de vagas menor ou igual a zero.
+
+Constraint de vagas ocupadas não negativas:
+
+```sql
+constraint ck_turmas_vagas_ocupadas_nao_negativa
+    check (vagas_ocupadas >= 0)
+```
+
+Impede que uma turma tenha número negativo de vagas ocupadas.
+
+Constraint de vagas ocupadas dentro do limite:
+
+```sql
+constraint ck_turmas_vagas_ocupadas_dentro_limite
+    check (vagas_ocupadas <= limite_vagas)
+```
+
+Impede que o número de vagas ocupadas ultrapasse o limite de vagas da turma.
+
+Constraint de status:
+
+```sql
+constraint ck_turmas_status_valido
+    check (status in ('ABERTA', 'FECHADA'))
+```
+
+Garante que a turma só aceite os status previstos pelo domínio.
+
+Constraint de código único:
+
+```sql
+constraint uk_turmas_codigo
+    unique (codigo)
+```
+
+Impede duas turmas com o mesmo código.
+
+## Tabela matriculas
+
+A tabela `matriculas` representa o vínculo entre um aluno e uma turma.
+
+Campos principais:
+
+- `id`
+- `aluno_id`
+- `turma_id`
+- `status`
+- `criado_em`
 - `confirmada_em`
 - `cancelada_em`
 
-## 3. Constraints por tabela
+Constraints de relacionamento:
 
-### 3.1 alunos
+```sql
+constraint fk_matriculas_aluno
+    foreign key (aluno_id)
+    references alunos (id)
+```
 
-| Constraint | Objetivo | Justificativa |
-|---|---|---|
-| `primary key` em `id` | Identificar unicamente cada aluno. | Necessário para relacionar aluno com matrícula. |
-| `uk_alunos_email unique(email)` | Impedir dois alunos com o mesmo e-mail. | Regra simples de consistência cadastral. |
-| `nome not null` | Exigir nome do aluno. | Aluno sem nome não é útil para os fluxos do sistema. |
-| `email not null` | Exigir e-mail do aluno. | O e-mail funciona como dado mínimo de contato/identificação. |
+Garante que toda matrícula esteja associada a um aluno existente.
 
-### 3.2 cursos
+```sql
+constraint fk_matriculas_turma
+    foreign key (turma_id)
+    references turmas (id)
+```
 
-| Constraint | Objetivo | Justificativa |
-|---|---|---|
-| `primary key` em `id` | Identificar unicamente cada curso. | Necessário para relacionar curso com disciplinas. |
-| `uk_cursos_nome unique(nome)` | Evitar duplicidade de cursos com o mesmo nome. | Mantém cadastro básico mais consistente. |
-| `nome not null` | Exigir nome do curso. | Curso sem nome não atende ao fluxo de cadastro. |
+Garante que toda matrícula esteja associada a uma turma existente.
 
-### 3.3 disciplinas
+Constraint de status:
 
-| Constraint | Objetivo | Justificativa |
-|---|---|---|
-| `fk_disciplinas_curso` | Garantir que toda disciplina pertença a um curso existente. | Sustenta o relacionamento Curso 1:N Disciplina. |
-| `ck_disciplinas_carga_horaria_positiva` | Impedir carga horária menor ou igual a zero. | Carga horária inválida deixaria o cadastro incoerente. |
-| `uk_disciplinas_curso_nome unique(curso_id, nome)` | Impedir duas disciplinas com o mesmo nome dentro do mesmo curso. | Permite nomes iguais em cursos diferentes, mas evita duplicidade dentro do curso. |
-| `curso_id not null` | Exigir vínculo com curso. | No modelo escolhido, disciplina sem curso está fora do escopo. |
+```sql
+constraint ck_matriculas_status_valido
+    check (status in ('PENDENTE', 'CONFIRMADA', 'CANCELADA'))
+```
 
-### 3.4 turmas
+Garante que a matrícula só aceite os status previstos pelo domínio.
 
-| Constraint | Objetivo | Justificativa |
-|---|---|---|
-| `fk_turmas_disciplina` | Garantir que toda turma pertença a uma disciplina existente. | Sustenta o relacionamento Disciplina 1:N Turma. |
-| `ck_turmas_limite_vagas_positivo` | Impedir turma com limite de vagas zero ou negativo. | O desafio exige controle de limite de vagas. |
-| `ck_turmas_vagas_ocupadas_nao_negativa` | Impedir quantidade negativa de vagas ocupadas. | Evita estado impossível no controle de vagas. |
-| `ck_turmas_vagas_ocupadas_dentro_limite` | Impedir vagas ocupadas maiores que o limite. | Protege a regra de capacidade da turma no banco. |
-| `ck_turmas_status_valido` | Permitir apenas `ABERTA` ou `FECHADA`. | O desafio exige que aluno só seja matriculado em turmas abertas. |
-| `uk_turmas_codigo unique(codigo)` | Evitar duas turmas com o mesmo código. | Facilita identificação da turma na API, frontend e testes manuais. |
+Constraint de confirmação:
 
-### 3.5 matriculas
+```sql
+constraint ck_matriculas_confirmada_em
+    check (
+        (status = 'CONFIRMADA' and confirmada_em is not null)
+        or status <> 'CONFIRMADA'
+    )
+```
 
-| Constraint | Objetivo | Justificativa |
-|---|---|---|
-| `fk_matriculas_aluno` | Garantir que a matrícula pertença a um aluno existente. | Sustenta consulta de matrículas por aluno. |
-| `fk_matriculas_turma` | Garantir que a matrícula pertença a uma turma existente. | Sustenta consulta de matrículas por turma e controle de vagas. |
-| `ck_matriculas_status_valido` | Permitir apenas `PENDENTE`, `CONFIRMADA` ou `CANCELADA`. | Esses são os status definidos no enunciado do desafio. |
-| `ck_matriculas_confirmada_em` | Exigir `confirmada_em` quando status for `CONFIRMADA`. | Evita matrícula confirmada sem registro temporal da confirmação. |
-| `ck_matriculas_cancelada_em` | Exigir `cancelada_em` quando status for `CANCELADA`. | Evita matrícula cancelada sem registro temporal do cancelamento. |
-| `uk_matriculas_aluno_turma unique(aluno_id, turma_id)` | Impedir que um aluno tenha duas matrículas na mesma turma. | Implementa diretamente a regra mínima do desafio. Mesmo matrícula cancelada permanece como histórico e bloqueia nova matrícula no escopo inicial. |
+Garante que uma matrícula confirmada tenha data de confirmação preenchida.
 
-## 4. Regra de duplicidade e rematrícula
+Constraint de cancelamento:
 
-A regra foi implementada de forma direta: um aluno pode ter apenas uma matrícula por turma. Mesmo que a matrícula seja cancelada, ela permanece registrada como histórico e não é criada uma nova matrícula para o mesmo aluno na mesma turma.
+```sql
+constraint ck_matriculas_cancelada_em
+    check (
+        (status = 'CANCELADA' and cancelada_em is not null)
+        or status <> 'CANCELADA'
+    )
+```
 
-Essa decisão prioriza aderência ao enunciado, simplicidade e facilidade de validação.
+Garante que uma matrícula cancelada tenha data de cancelamento preenchida.
 
-Em uma evolução futura, seria possível permitir rematrícula considerando apenas matrículas ativas como bloqueio, substituindo a constraint única simples por uma regra baseada em status, como um índice parcial no PostgreSQL.
+Constraint de duplicidade:
 
-## 5. O que fica fora da migration inicial
+```sql
+constraint uk_matriculas_aluno_turma
+    unique (aluno_id, turma_id)
+```
 
-- Usuário administrativo e autenticação.
-- Professor, sala, horário, grade curricular, notas e frequência.
-- Controle avançado de concorrência para a última vaga.
-- Rematrícula após cancelamento.
-- Triggers para atualização automática de `atualizado_em`. Essa responsabilidade ficará inicialmente na aplicação.
+Implementa a regra de que um aluno não pode se matricular duas vezes na mesma turma.
 
-## 6. Observação para entrevista técnica
+Nesta versão, mesmo que uma matrícula seja cancelada, ela permanece como histórico e não é criada uma nova matrícula para o mesmo aluno na mesma turma.
 
-As constraints do banco não substituem as regras de negócio no service. Elas funcionam como uma segunda camada de proteção. A aplicação deve validar as regras com mensagens compreensíveis; o banco protege a integridade caso alguma operação inconsistente tente passar.
+Em uma evolução futura, seria possível permitir rematrícula considerando apenas matrículas ativas como bloqueio. Essa decisão exigiria outro tipo de regra, como índice parcial no PostgreSQL ou validação baseada em status.
+
+## Regras protegidas pelo banco
+
+O banco protege as seguintes regras estruturais:
+
+- aluno deve ter e-mail único;
+- curso deve ter nome único;
+- disciplina deve ter nome único;
+- disciplina deve ter carga horária positiva;
+- curso e disciplina não podem ser associados repetidamente;
+- turma deve estar vinculada a uma associação entre curso e disciplina;
+- turma deve ter limite de vagas positivo;
+- turma não pode ter vagas ocupadas negativas;
+- turma não pode ter vagas ocupadas acima do limite;
+- turma só pode ter status ABERTA ou FECHADA;
+- matrícula deve estar vinculada a aluno e turma existentes;
+- matrícula só pode ter status PENDENTE, CONFIRMADA ou CANCELADA;
+- matrícula confirmada deve ter data de confirmação;
+- matrícula cancelada deve ter data de cancelamento;
+- aluno não pode ter duas matrículas para a mesma turma.
+
+## Banco e camada de service
+
+As constraints do banco não substituem as regras na camada de service.
+
+A estratégia adotada é:
+
+- o service valida regras de negócio e fornece mensagens mais claras;
+- o banco protege a consistência final dos dados;
+- as entidades protegem pequenos estados internos, como confirmação, cancelamento, consumo e liberação de vaga.
+
+Exemplo de divisão:
+
+```text
+Service:
+- verifica se aluno existe;
+- verifica se turma existe;
+- verifica se turma está aberta;
+- verifica se aluno já possui matrícula;
+- coordena confirmação e cancelamento.
+
+Entidade:
+- matrícula sabe confirmar e cancelar seu próprio status;
+- turma sabe consumir e liberar vaga.
+
+Banco:
+- impede status inválido;
+- impede duplicidade;
+- impede vagas ocupadas acima do limite;
+- garante chaves estrangeiras.
+```
+
+## Decisão sobre migrations
+
+Durante o desenvolvimento local, a migration `V1__create_initial_schema.sql` foi ajustada antes da entrega final para refletir melhor o domínio.
+
+Como o banco era local e descartável, o volume do PostgreSQL pôde ser removido com:
+
+```bash
+docker compose down -v
+```
+
+Em um ambiente compartilhado ou em produção, uma migration já aplicada não deveria ser alterada. Nesse caso, seria criada uma nova migration, como `V2__...sql`.
+
+## Limitações conhecidas
+
+A modelagem atual não implementa:
+
+- matriz curricular completa;
+- versionamento de grade curricular;
+- pré-requisitos de disciplinas;
+- professor;
+- sala;
+- horário;
+- notas;
+- frequência;
+- autenticação;
+- rematrícula após cancelamento;
+- controle avançado de concorrência para confirmação simultânea da última vaga.
+
+Esses elementos foram deixados fora do escopo inicial para manter o foco nos requisitos centrais do desafio.
