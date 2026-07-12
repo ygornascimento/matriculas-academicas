@@ -1,3 +1,10 @@
+# Este roteiro foi preparado para ser executado com o banco limpo.
+# Para resetar o banco usando Docker:
+# docker compose down -v
+# docker compose up -d
+#
+# Depois suba o backend e execute os blocos em ordem.
+
 @baseUrl = http://localhost:8080
 
 ### Listar alunos
