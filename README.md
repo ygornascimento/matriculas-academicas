@@ -1,3 +1,11 @@
+### Documentação da API
+
+Com o backend em execução, a documentação Swagger pode ser acessada em:
+
+```text
+http://localhost:8080/swagger-ui.html
+``
+
 # Matrículas Acadêmicas
 
 Sistema simples para gestão de matrículas acadêmicas, desenvolvido como desafio técnico júnior full stack.
@@ -161,6 +169,7 @@ A regra "um aluno não pode se matricular duas vezes na mesma turma" foi impleme
 Mesmo que uma matrícula seja cancelada, ela permanece registrada como histórico, e o sistema não cria uma nova matrícula para o mesmo aluno na mesma turma.
 
 Essa decisão mantém a regra simples, aderente ao enunciado e fácil de validar. Em uma evolução futura, seria possível permitir rematrícula considerando apenas matrículas ativas como bloqueio, mas essa variação não faz parte do escopo inicial.
+
 
 ## Regras de negócio da aplicação
 
