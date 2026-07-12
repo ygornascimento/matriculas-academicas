@@ -1,9 +1,16 @@
+# Este roteiro foi preparado para ser executado com o banco limpo.
+# Para resetar o banco usando Docker:
+# docker compose down -v
+# docker compose up -d
+#
+# Depois suba o backend e execute os blocos em ordem.
+
 @baseUrl = http://localhost:8080
 
 # Ajuste estes IDs conforme os cursos e disciplinas existentes no seu banco.
 # Use GET /api/cursos e GET /api/disciplinas para conferir.
-@cursoId = 2
-@disciplinaId = 2
+@cursoId = 1
+@disciplinaId = 1
 @cursoDisciplinaId = 1
 
 
