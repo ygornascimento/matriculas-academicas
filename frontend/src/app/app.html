@@ -1,6 +1,9 @@
 <main class="container">
   <h1>Matrículas Acadêmicas</h1>
 
+  <p *ngIf="mensagem" class="success">{{ mensagem }}</p>
+  <p *ngIf="erro" class="error">{{ erro }}</p>
+
   <section class="card">
     <h2>Cadastrar aluno</h2>
 
@@ -27,9 +30,62 @@
 
       <button type="submit">Cadastrar aluno</button>
     </form>
+  </section>
 
-    <p *ngIf="mensagem" class="success">{{ mensagem }}</p>
-    <p *ngIf="erro" class="error">{{ erro }}</p>
+  <section class="card">
+    <h2>Cadastrar curso</h2>
+
+    <form (ngSubmit)="criarCurso()">
+      <div class="form-group">
+        <label for="curso-nome">Nome</label>
+        <input
+          id="curso-nome"
+          name="curso-nome"
+          type="text"
+          [(ngModel)]="novoCurso.nome"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="curso-descricao">Descrição</label>
+        <input
+          id="curso-descricao"
+          name="curso-descricao"
+          type="text"
+          [(ngModel)]="novoCurso.descricao"
+        >
+      </div>
+
+      <button type="submit">Cadastrar curso</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Cadastrar disciplina</h2>
+
+    <form (ngSubmit)="criarDisciplina()">
+      <div class="form-group">
+        <label for="disciplina-nome">Nome</label>
+        <input
+          id="disciplina-nome"
+          name="disciplina-nome"
+          type="text"
+          [(ngModel)]="novaDisciplina.nome"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="disciplina-carga-horaria">Carga horária</label>
+        <input
+          id="disciplina-carga-horaria"
+          name="disciplina-carga-horaria"
+          type="number"
+          [(ngModel)]="novaDisciplina.cargaHoraria"
+        >
+      </div>
+
+      <button type="submit">Cadastrar disciplina</button>
+    </form>
   </section>
 
   <section class="card">
@@ -51,6 +107,54 @@
           <td>{{ aluno.id }}</td>
           <td>{{ aluno.nome }}</td>
           <td>{{ aluno.email }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Cursos cadastrados</h2>
+
+    <p *ngIf="cursos.length === 0">Nenhum curso cadastrado.</p>
+
+    <table *ngIf="cursos.length > 0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Descrição</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let curso of cursos">
+          <td>{{ curso.id }}</td>
+          <td>{{ curso.nome }}</td>
+          <td>{{ curso.descricao }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Disciplinas cadastradas</h2>
+
+    <p *ngIf="disciplinas.length === 0">Nenhuma disciplina cadastrada.</p>
+
+    <table *ngIf="disciplinas.length > 0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Carga horária</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let disciplina of disciplinas">
+          <td>{{ disciplina.id }}</td>
+          <td>{{ disciplina.nome }}</td>
+          <td>{{ disciplina.cargaHoraria }}h</td>
         </tr>
       </tbody>
     </table>
