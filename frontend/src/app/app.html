@@ -1,0 +1,67 @@
+<main class="container">
+  <h1>Matrículas Acadêmicas</h1>
+
+  <section class="card">
+    <h2>Cadastrar aluno</h2>
+
+    <form (ngSubmit)="criarAluno()">
+      <div class="form-group">
+        <label for="nome">Nome</label>
+        <input
+          id="nome"
+          name="nome"
+          type="text"
+          [(ngModel)]="novoAluno.nome"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="email">E-mail</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          [(ngModel)]="novoAluno.email"
+        >
+      </div>
+
+      <button type="submit">Cadastrar aluno</button>
+    </form>
+
+    @if (mensagem) {
+      <p class="success">{{ mensagem }}</p>
+    }
+
+    @if (erro) {
+      <p class="error">{{ erro }}</p>
+    }
+  </section>
+
+  <section class="card">
+    <h2>Alunos cadastrados</h2>
+
+    @if (alunos.length === 0) {
+      <p>Nenhum aluno cadastrado.</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>E-mail</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (aluno of alunos; track aluno.id) {
+            <tr>
+              <td>{{ aluno.id }}</td>
+              <td>{{ aluno.nome }}</td>
+              <td>{{ aluno.email }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </section>
+</main>
