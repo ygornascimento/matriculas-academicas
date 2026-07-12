@@ -6,20 +6,20 @@
 
     <form (ngSubmit)="criarAluno()">
       <div class="form-group">
-        <label for="nome">Nome</label>
+        <label for="aluno-nome">Nome</label>
         <input
-          id="nome"
-          name="nome"
+          id="aluno-nome"
+          name="aluno-nome"
           type="text"
           [(ngModel)]="novoAluno.nome"
         >
       </div>
 
       <div class="form-group">
-        <label for="email">E-mail</label>
+        <label for="aluno-email">E-mail</label>
         <input
-          id="email"
-          name="email"
+          id="aluno-email"
+          name="aluno-email"
           type="email"
           [(ngModel)]="novoAluno.email"
         >
@@ -28,40 +28,31 @@
       <button type="submit">Cadastrar aluno</button>
     </form>
 
-    @if (mensagem) {
-      <p class="success">{{ mensagem }}</p>
-    }
-
-    @if (erro) {
-      <p class="error">{{ erro }}</p>
-    }
+    <p *ngIf="mensagem" class="success">{{ mensagem }}</p>
+    <p *ngIf="erro" class="error">{{ erro }}</p>
   </section>
 
   <section class="card">
     <h2>Alunos cadastrados</h2>
 
-    @if (alunos.length === 0) {
-      <p>Nenhum aluno cadastrado.</p>
-    } @else {
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nome</th>
-            <th>E-mail</th>
-          </tr>
-        </thead>
+    <p *ngIf="alunos.length === 0">Nenhum aluno cadastrado.</p>
 
-        <tbody>
-          @for (aluno of alunos; track aluno.id) {
-            <tr>
-              <td>{{ aluno.id }}</td>
-              <td>{{ aluno.nome }}</td>
-              <td>{{ aluno.email }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    }
+    <table *ngIf="alunos.length > 0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>E-mail</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let aluno of alunos">
+          <td>{{ aluno.id }}</td>
+          <td>{{ aluno.nome }}</td>
+          <td>{{ aluno.email }}</td>
+        </tr>
+      </tbody>
+    </table>
   </section>
 </main>

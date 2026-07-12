@@ -1,11 +1,13 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+
 import { Aluno } from './models/aluno.model';
 import { AlunoService } from './services/aluno.service';
 
 @Component({
   selector: 'app-root',
-  imports: [FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -54,8 +56,16 @@ export class App implements OnInit {
         this.carregarAlunos();
       },
       error: error => {
-        this.erro = error.error?.mensagem ?? 'Erro ao cadastrar aluno.';
+        this.erro = this.extrairMensagemErro(error, 'Erro ao cadastrar aluno.');
       }
     });
+  }
+
+  private extrairMensagemErro(error: any, mensagemPadrao: string): string {
+    if (error.error?.campos?.length > 0) {
+      return error.error.campos[0].mensagem;
+    }
+
+    return error.error?.mensagem ?? mensagemPadrao;
   }
 }
