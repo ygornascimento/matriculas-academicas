@@ -34,12 +34,16 @@ public class MatriculaService {
         Aluno aluno = buscarAlunoPorId(alunoId);
         Turma turma = buscarTurmaPorId(turmaId);
 
-        if (!turma.estaAberta()) {
+        if (matriculaRepository.existsByAlunoIdAndTurmaId(alunoId, turmaId)) {
+            throw new RegraDeNegocioException("Aluno já possui matrícula nesta turma.");
+        }
+
+        if (turma.estaFechada()) {
             throw new RegraDeNegocioException("Só é possível matricular aluno em turma aberta.");
         }
 
-        if (matriculaRepository.existsByAlunoIdAndTurmaId(alunoId, turmaId)) {
-            throw new RegraDeNegocioException("Aluno já possui matrícula nesta turma.");
+        if (!turma.possuiVagaDisponivel()) {
+            throw new RegraDeNegocioException("Turma não possui vagas disponíveis.");
         }
 
         Matricula matricula = new Matricula(aluno, turma);
@@ -78,7 +82,7 @@ public class MatriculaService {
             throw new RegraDeNegocioException("Somente matrículas pendentes podem ser confirmadas.");
         }
 
-        if (!turma.estaAberta()) {
+        if (turma.estaFechada()) {
             throw new RegraDeNegocioException("Só é possível confirmar matrícula de turma aberta.");
         }
 

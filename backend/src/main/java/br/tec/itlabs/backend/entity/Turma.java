@@ -110,6 +110,7 @@ public class Turma {
         }
 
         this.vagasOcupadas++;
+        atualizarStatusPorVagas();
         this.atualizadoEm = Instant.now();
     }
 
@@ -119,6 +120,11 @@ public class Turma {
         }
 
         this.vagasOcupadas--;
+
+        if (!estaFechada()) {
+            atualizarStatusPorVagas();
+        }
+
         this.atualizadoEm = Instant.now();
     }
 
@@ -128,20 +134,36 @@ public class Turma {
     }
 
     public void abrir() {
-        this.status = StatusTurma.ABERTA;
+        atualizarStatusPorVagas();
         this.atualizadoEm = Instant.now();
     }
 
-    public void alterarDados(
-            CursoDisciplina cursoDisciplina,
-            String codigo,
-            String periodo,
-            Integer limiteVagas
-    ) {
+    public boolean estaCompleta() {
+        return StatusTurma.COMPLETA.equals(status);
+    }
+
+    public boolean estaFechada() {
+        return StatusTurma.FECHADA.equals(status);
+    }
+
+    public void alterarDados(CursoDisciplina cursoDisciplina, String codigo, String periodo, Integer limiteVagas) {
         this.cursoDisciplina = cursoDisciplina;
         this.codigo = codigo;
         this.periodo = periodo;
         this.limiteVagas = limiteVagas;
+
+        if (!estaFechada()) {
+            atualizarStatusPorVagas();
+        }
+
         this.atualizadoEm = Instant.now();
+    }
+
+    private void atualizarStatusPorVagas() {
+        if (this.vagasOcupadas >= this.limiteVagas) {
+            this.status = StatusTurma.COMPLETA;
+        } else {
+            this.status = StatusTurma.ABERTA;
+        }
     }
 }

@@ -80,7 +80,7 @@ create table turmas
         check (vagas_ocupadas <= limite_vagas),
 
     constraint ck_turmas_status_valido
-        check (status in ('ABERTA', 'FECHADA')),
+        check (status in ('ABERTA', 'FECHADA', 'COMPLETA')),
 
     constraint uk_turmas_codigo
         unique (codigo)
