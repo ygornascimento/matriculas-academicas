@@ -89,6 +89,70 @@
   </section>
 
   <section class="card">
+  <h2>Associar disciplina ao curso</h2>
+
+  <form (ngSubmit)="associarCursoDisciplina()">
+    <div class="form-group">
+      <label for="associacao-curso">Curso</label>
+      <select
+        id="associacao-curso"
+        name="associacao-curso"
+        [(ngModel)]="novaAssociacao.cursoId"
+      >
+        <option [ngValue]="null">Selecione um curso</option>
+
+        <option *ngFor="let curso of cursos" [ngValue]="curso.id">
+          {{ curso.id }} - {{ curso.nome }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="associacao-disciplina">Disciplina</label>
+      <select
+        id="associacao-disciplina"
+        name="associacao-disciplina"
+        [(ngModel)]="novaAssociacao.disciplinaId"
+      >
+        <option [ngValue]="null">Selecione uma disciplina</option>
+
+        <option *ngFor="let disciplina of disciplinas" [ngValue]="disciplina.id">
+          {{ disciplina.id }} - {{ disciplina.nome }}
+        </option>
+      </select>
+    </div>
+
+    <button type="submit">Associar disciplina ao curso</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Disciplinas associadas a cursos</h2>
+
+  <p *ngIf="cursoDisciplinas.length === 0">
+    Nenhuma disciplina associada a curso.
+  </p>
+
+  <table *ngIf="cursoDisciplinas.length > 0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Curso</th>
+        <th>Disciplina</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let cursoDisciplina of cursoDisciplinas">
+        <td>{{ cursoDisciplina.id }}</td>
+        <td>{{ buscarNomeCurso(cursoDisciplina.cursoId) }}</td>
+        <td>{{ buscarNomeDisciplina(cursoDisciplina.disciplinaId) }}</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+  <section class="card">
     <h2>Alunos cadastrados</h2>
 
     <p *ngIf="alunos.length === 0">Nenhum aluno cadastrado.</p>

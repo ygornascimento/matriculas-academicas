@@ -5,10 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { Aluno } from './models/aluno.model';
 import { Curso } from './models/curso.model';
 import { Disciplina } from './models/disciplina.model';
+import { CursoDisciplina } from './models/curso-disciplina.model';
 
 import { AlunoService } from './services/aluno.service';
 import { CursoService } from './services/curso.service';
 import { DisciplinaService } from './services/disciplina.service';
+import { CursoDisciplinaService } from './services/curso-disciplina.service';
 
 @Component({
   selector: 'app-root',
@@ -21,6 +23,7 @@ export class App implements OnInit {
   alunos: Aluno[] = [];
   cursos: Curso[] = [];
   disciplinas: Disciplina[] = [];
+  cursoDisciplinas: CursoDisciplina[] = [];
 
   novoAluno = {
     nome: '',
@@ -37,19 +40,26 @@ export class App implements OnInit {
     cargaHoraria: null as number | null
   };
 
+  novaAssociacao = {
+  cursoId: null as number | null,
+  disciplinaId: null as number | null
+  };
+
   mensagem = '';
   erro = '';
 
   constructor(
     private readonly alunoService: AlunoService,
     private readonly cursoService: CursoService,
-    private readonly disciplinaService: DisciplinaService
+    private readonly disciplinaService: DisciplinaService,
+    private readonly cursoDisciplinaService: CursoDisciplinaService
   ) {}
 
   ngOnInit(): void {
     this.carregarAlunos();
     this.carregarCursos();
     this.carregarDisciplinas();
+    this.carregarCursoDisciplinas();
   }
 
   carregarAlunos(): void {
@@ -144,6 +154,48 @@ export class App implements OnInit {
       }
     });
   }
+
+  carregarCursoDisciplinas(): void {
+  this.cursoDisciplinaService.listar().subscribe({
+    next: cursoDisciplinas => {
+      this.cursoDisciplinas = cursoDisciplinas;
+    },
+    error: () => {
+      this.erro = 'Erro ao carregar associações entre cursos e disciplinas.';
+    }
+  });
+}
+
+associarCursoDisciplina(): void {
+  this.limparMensagens();
+
+  this.cursoDisciplinaService.associar(this.novaAssociacao).subscribe({
+    next: () => {
+      this.mensagem = 'Disciplina associada ao curso com sucesso.';
+
+      this.novaAssociacao = {
+        cursoId: null,
+        disciplinaId: null
+      };
+
+      this.carregarCursoDisciplinas();
+    },
+    error: error => {
+      this.erro = this.extrairMensagemErro(
+        error,
+        'Erro ao associar disciplina ao curso.'
+      );
+    }
+  });
+}
+
+buscarNomeCurso(cursoId: number): string {
+  return this.cursos.find(curso => curso.id === cursoId)?.nome ?? `Curso ${cursoId}`;
+}
+
+buscarNomeDisciplina(disciplinaId: number): string {
+  return this.disciplinas.find(disciplina => disciplina.id === disciplinaId)?.nome ?? `Disciplina ${disciplinaId}`;
+}
 
   private limparMensagens(): void {
     this.mensagem = '';
