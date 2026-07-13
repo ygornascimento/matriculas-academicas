@@ -27,7 +27,11 @@ A aplicação permite:
 - consultar matrículas por aluno;
 - consultar matrículas por turma.
 
-## Tecnologias previstas para a entrega
+## Tecnologias utilizadas
+
+## Tecnologias utilizadas
+
+### Backend
 
 - Java 17
 - Spring Boot
@@ -36,32 +40,42 @@ A aplicação permite:
 - Bean Validation
 - PostgreSQL
 - Flyway
-- Docker Compose
+- Springdoc OpenAPI / Swagger
+- JUnit 5
+- Mockito
+
+### Frontend
+
 - Angular
+- TypeScript
+- HTML
+- CSS
 
-## Status atual do desenvolvimento
+### Infraestrutura local
 
-O projeto está em desenvolvimento.
+- Docker
+- Docker Compose
+- Maven Wrapper
 
-Até o momento, foram implementados:
+## Status da entrega
 
-- configuração inicial do backend Spring Boot;
-- configuração do PostgreSQL via Docker Compose;
-- versionamento inicial do banco com Flyway;
-- entidades JPA principais;
-- repositories Spring Data JPA;
-- services iniciais de cadastro e regras de domínio;
-- documentação inicial das decisões de domínio e banco de dados.
+A aplicação possui os principais fluxos implementados e validados manualmente:
 
-Ainda serão implementados:
-
-- DTOs de entrada e saída;
-- controllers REST;
-- validações de entrada com Bean Validation;
-- tratamento global de erros;
-- frontend Angular;
-- documentação dos endpoints;
-- testes e validação manual dos fluxos principais.
+- cadastro de alunos;
+- cadastro de cursos;
+- cadastro de disciplinas;
+- associação de disciplinas a cursos;
+- cadastro de turmas;
+- criação de matrículas;
+- confirmação de matrículas;
+- cancelamento de matrículas;
+- consulta de matrículas por aluno;
+- consulta de matrículas por turma;
+- frontend Angular consumindo a API;
+- documentação Swagger da API;
+- versionamento do banco com Flyway;
+- banco PostgreSQL executado via Docker Compose;
+- testes automatizados para regras principais de matrícula.
 
 ## Decisões de domínio
 
@@ -139,10 +153,21 @@ Essa modelagem evita uma simplificação excessiva do domínio sem implementar u
 
 Uma turma pode possuir os seguintes status:
 
-- ABERTA
-- FECHADA
+- `ABERTA`
+- `COMPLETA`
+- `FECHADA`
 
-Somente turmas abertas podem receber matrículas.
+O significado de cada status é:
+
+- `ABERTA`: a turma está disponível para matrícula e possui vaga.
+- `COMPLETA`: a turma atingiu o limite de vagas.
+- `FECHADA`: a turma foi fechada administrativamente.
+
+Somente turmas não fechadas e com vaga disponível podem receber novas matrículas.
+
+Quando uma matrícula é confirmada e a última vaga é ocupada, a turma passa para `COMPLETA`.
+
+Quando uma matrícula confirmada é cancelada e uma vaga é liberada, a turma volta para `ABERTA`, desde que não esteja fechada.
 
 ### Status da matrícula
 
@@ -254,18 +279,20 @@ O backend segue uma organização simples por camadas:
 - `controller`: endpoints REST, a serem implementados;
 - `dto`: objetos de entrada e saída da API, a serem implementados.
 
-A escolha por uma organização em camadas foi feita para manter o projeto claro, fácil de navegar e compatível com o escopo júnior do desafio.
+A escolha por uma organização em camadas foi feita para manter o projeto claro, fácil de navegar e compatível com o escopo do desafio.
 
 ## Como rodar o projeto
-
-> Esta seção será atualizada conforme o backend e o frontend forem concluídos.
 
 ### Pré-requisitos
 
 - Java 17
-- Maven Wrapper incluído no projeto
 - Docker
 - Docker Compose
+- Node.js / Angular 20
+- npm
+
+O projeto utiliza Maven Wrapper no backend, portanto não é necessário ter Maven instalado globalmente.
+O frontend foi desenvolvido com Angular 20. Não é necessário instalar Angular CLI globalmente, pois as dependências do projeto são instaladas com `npm install` e executadas com `npm start`.
 
 ### Subir o banco de dados
 
@@ -273,33 +300,7 @@ Na raiz do projeto:
 
 ```bash
 docker compose up -d
-```
 
-### Rodar o backend
-
-Na pasta `backend`:
-
-```bash
-./mvnw spring-boot:run
-```
-
-### Parar os containers
-
-Na raiz do projeto:
-
-```bash
-docker compose down
-```
-
-### Apagar os dados locais do banco
-
-Na raiz do projeto:
-
-```bash
-docker compose down -v
-```
-
-O parâmetro `-v` remove também o volume do PostgreSQL. Isso apaga os dados locais e permite recriar o banco do zero.
 
 ## Documentação complementar
 
@@ -319,7 +320,7 @@ O uso ocorreu principalmente nas seguintes atividades:
 - apoio na elaboração do README e dos cenários de validação manual;
 - revisão de decisões técnicas como Flyway, Java 17, ausência de Lombok e uso de constraints no banco.
 
-As decisões finais de modelagem, implementação, nomes de classes, endpoints, regras de negócio e organização do código foram revisadas manualmente por mim.
+As decisões finais de modelagem, implementação, nomes de classes, endpoints, regras de negócio e organização do código foram pensadas e revisadas manualmente por mim.
 
 A IA foi utilizada como apoio para raciocínio, revisão e organização, não como substituição da compreensão do código.
 
