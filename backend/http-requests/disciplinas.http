@@ -1,0 +1,127 @@
+# Este roteiro foi preparado para ser executado com o banco limpo.
+# Para resetar o banco usando Docker:
+# docker compose down -v
+# docker compose up -d
+#
+# Depois suba o backend e execute os blocos em ordem.
+
+@baseUrl = http://localhost:8080
+
+### Listar disciplinas
+GET {{baseUrl}}/api/disciplinas
+
+
+### Criar disciplina
+POST {{baseUrl}}/api/disciplinas
+Content-Type: application/json
+
+{
+  "nome": "Banco de Dados",
+  "cargaHoraria": 80
+}
+
+
+### Criar disciplina com nome duplicado — deve retornar erro de regra de negócio
+POST {{baseUrl}}/api/disciplinas
+Content-Type: application/json
+
+{
+  "nome": "Banco de Dados",
+  "cargaHoraria": 80
+}
+
+
+### Buscar disciplina por ID
+GET {{baseUrl}}/api/disciplinas/1
+
+
+### Atualizar disciplina mantendo o mesmo nome — deve permitir
+PUT {{baseUrl}}/api/disciplinas/1
+Content-Type: application/json
+
+{
+  "nome": "Banco de Dados",
+  "cargaHoraria": 100
+}
+
+
+### Criar segunda disciplina
+POST {{baseUrl}}/api/disciplinas
+Content-Type: application/json
+
+{
+  "nome": "Programação Orientada a Objetos",
+  "cargaHoraria": 80
+}
+
+
+### Atualizar disciplina usando nome de outra disciplina — deve retornar erro de regra de negócio
+PUT {{baseUrl}}/api/disciplinas/1
+Content-Type: application/json
+
+{
+  "nome": "Programação Orientada a Objetos",
+  "cargaHoraria": 100
+}
+
+
+### Atualizar disciplina
+PUT {{baseUrl}}/api/disciplinas/1
+Content-Type: application/json
+
+{
+  "nome": "Banco de Dados Relacional",
+  "cargaHoraria": 100
+}
+
+
+### Criar disciplina com nome vazio — deve retornar erro de validação
+POST {{baseUrl}}/api/disciplinas
+Content-Type: application/json
+
+{
+  "nome": "",
+  "cargaHoraria": 80
+}
+
+
+### Criar disciplina com carga horária nula — deve retornar erro de validação
+POST {{baseUrl}}/api/disciplinas
+Content-Type: application/json
+
+{
+  "nome": "Redes de Computadores",
+  "cargaHoraria": null
+}
+
+
+### Criar disciplina com carga horária negativa — deve retornar erro de validação
+POST {{baseUrl}}/api/disciplinas
+Content-Type: application/json
+
+{
+  "nome": "Sistemas Operacionais",
+  "cargaHoraria": -10
+}
+
+
+### Buscar disciplina inexistente — deve retornar 404
+GET {{baseUrl}}/api/disciplinas/999
+
+
+### Atualizar disciplina inexistente — deve retornar 404
+PUT {{baseUrl}}/api/disciplinas/999
+Content-Type: application/json
+
+{
+  "nome": "Disciplina Inexistente",
+  "cargaHoraria": 80
+}
+
+
+### Excluir disciplina
+DELETE {{baseUrl}}/api/disciplinas/1
+
+
+### Listar disciplinas após exclusão
+GET {{baseUrl}}/api/disciplinas

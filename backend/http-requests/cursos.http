@@ -1,0 +1,107 @@
+# Este roteiro foi preparado para ser executado com o banco limpo.
+# Para resetar o banco usando Docker:
+# docker compose down -v
+# docker compose up -d
+#
+# Depois suba o backend e execute os blocos em ordem.
+
+@baseUrl = http://localhost:8080
+
+### Listar cursos
+GET {{baseUrl}}/api/cursos
+
+
+### Criar curso
+POST {{baseUrl}}/api/cursos
+Content-Type: application/json
+
+{
+  "nome": "Sistemas de Informação",
+  "descricao": "Curso superior voltado para desenvolvimento de sistemas, banco de dados e gestão da informação."
+}
+
+
+### Criar curso com nome duplicado — deve retornar erro de regra de negócio
+POST {{baseUrl}}/api/cursos
+Content-Type: application/json
+
+{
+  "nome": "Sistemas de Informação",
+  "descricao": "Tentativa de cadastrar curso duplicado."
+}
+
+
+### Buscar curso por ID
+GET {{baseUrl}}/api/cursos/1
+
+
+### Atualizar curso mantendo o mesmo nome — deve permitir
+PUT {{baseUrl}}/api/cursos/1
+Content-Type: application/json
+
+{
+  "nome": "Sistemas de Informação",
+  "descricao": "Curso atualizado, mantendo o mesmo nome."
+}
+
+
+### Criar segundo curso
+POST {{baseUrl}}/api/cursos
+Content-Type: application/json
+
+{
+  "nome": "Análise e Desenvolvimento de Sistemas",
+  "descricao": "Curso superior de tecnologia focado em análise, projeto e desenvolvimento de software."
+}
+
+
+### Atualizar curso usando nome de outro curso — deve retornar erro de regra de negócio
+PUT {{baseUrl}}/api/cursos/1
+Content-Type: application/json
+
+{
+  "nome": "Análise e Desenvolvimento de Sistemas",
+  "descricao": "Tentativa de usar nome já cadastrado em outro curso."
+}
+
+
+### Atualizar curso
+PUT {{baseUrl}}/api/cursos/1
+Content-Type: application/json
+
+{
+  "nome": "Sistemas de Informação Atualizado",
+  "descricao": "Curso atualizado para validar o endpoint de edição."
+}
+
+
+### Criar curso com nome vazio — deve retornar erro de validação
+POST {{baseUrl}}/api/cursos
+Content-Type: application/json
+
+{
+  "nome": "",
+  "descricao": "Curso sem nome."
+}
+
+
+### Buscar curso inexistente — deve retornar 404
+GET {{baseUrl}}/api/cursos/999
+
+
+### Atualizar curso inexistente — deve retornar 404
+PUT {{baseUrl}}/api/cursos/999
+Content-Type: application/json
+
+{
+  "nome": "Curso Inexistente",
+  "descricao": "Tentativa de atualizar curso que não existe."
+}
+
+
+### Excluir curso
+DELETE {{baseUrl}}/api/cursos/1
+
+
+### Listar cursos após exclusão
+GET {{baseUrl}}/api/cursos

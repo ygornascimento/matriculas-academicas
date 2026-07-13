@@ -1,0 +1,374 @@
+# =========================================================
+# FLUXO COMPLETO DE MATRÍCULAS ACADÊMICAS
+# =========================================================
+#
+# Este roteiro foi preparado para ser executado com o banco limpo.
+#
+# Para resetar o banco:
+# docker compose down -v
+# docker compose up -d
+#
+# Depois suba o backend:
+# cd backend
+# ./mvnw spring-boot:run
+#
+# Execute as requisições em ordem.
+# Com o banco limpo, os IDs esperados começam em 1.
+# =========================================================
+
+@baseUrl = http://localhost:8080
+# =========================================================
+# CENÁRIO BASE
+# Rode os blocos em ordem e ajuste os IDs abaixo conforme
+# os valores retornados pelas respostas.
+# =========================================================
+
+@alunoId = 1
+@cursoId = 1
+@disciplinaId = 1
+@cursoDisciplinaId = 1
+@turmaId = 1
+@matriculaId = 1
+
+# =========================================================
+# 1) CRIAR ALUNO
+# =========================================================
+
+### Criar aluno
+POST {{baseUrl}}/api/alunos
+Content-Type: application/json
+
+{
+  "nome": "Aluno Matrícula Teste",
+  "email": "aluno.matricula.teste@email.com"
+}
+
+# Depois do POST acima, copie o id retornado e atualize:
+# @alunoId = ?
+
+# =========================================================
+# 2) CRIAR CURSO
+# =========================================================
+
+### Criar curso
+POST {{baseUrl}}/api/cursos
+Content-Type: application/json
+
+{
+  "nome": "Curso Matrícula Teste",
+  "descricao": "Curso criado para validar o fluxo de matrícula."
+}
+
+# Depois do POST acima, copie o id retornado e atualize:
+# @cursoId = ?
+
+# =========================================================
+# 3) CRIAR DISCIPLINA
+# =========================================================
+
+### Criar disciplina
+POST {{baseUrl}}/api/disciplinas
+Content-Type: application/json
+
+{
+  "nome": "Disciplina Matrícula Teste",
+  "cargaHoraria": 80
+}
+
+# Depois do POST acima, copie o id retornado e atualize:
+# @disciplinaId = ?
+
+# =========================================================
+# 4) ASSOCIAR CURSO E DISCIPLINA
+# =========================================================
+
+### Associar disciplina ao curso
+POST {{baseUrl}}/api/curso-disciplinas
+Content-Type: application/json
+
+{
+  "cursoId": {{cursoId}},
+  "disciplinaId": {{disciplinaId}}
+}
+
+# Depois do POST acima, copie o id retornado e atualize:
+# @cursoDisciplinaId = ?
+
+# =========================================================
+# 5) CRIAR TURMA
+# =========================================================
+
+### Criar turma
+POST {{baseUrl}}/api/turmas
+Content-Type: application/json
+
+{
+  "cursoDisciplinaId": {{cursoDisciplinaId}},
+  "codigo": "TURMA-MATRICULA-TESTE-01",
+  "periodo": "2026.2",
+  "limiteVagas": 1
+}
+
+# Depois do POST acima, copie o id retornado e atualize:
+# @turmaId = ?
+
+# =========================================================
+# 6) CONSULTAS INICIAIS
+# =========================================================
+
+### Buscar turma por ID
+GET {{baseUrl}}/api/turmas/{{turmaId}}
+
+### Listar matrículas
+GET {{baseUrl}}/api/matriculas
+
+### Listar matrículas por aluno
+GET {{baseUrl}}/api/matriculas/aluno/{{alunoId}}
+
+### Listar matrículas por turma
+GET {{baseUrl}}/api/matriculas/turma/{{turmaId}}
+
+# =========================================================
+# 7) CRIAR MATRÍCULA PENDENTE
+# =========================================================
+
+### Criar matrícula
+POST {{baseUrl}}/api/matriculas
+Content-Type: application/json
+
+{
+  "alunoId": {{alunoId}},
+  "turmaId": {{turmaId}}
+}
+
+# Esperado:
+# - status da matrícula = PENDENTE
+# - turma continua com vagasOcupadas = 0
+
+# Depois do POST acima, copie o id retornado e atualize:
+# @matriculaId = ?
+
+### Buscar matrícula por ID
+GET {{baseUrl}}/api/matriculas/{{matriculaId}}
+
+### Buscar turma após criar matrícula pendente
+GET {{baseUrl}}/api/turmas/{{turmaId}}
+
+# =========================================================
+# 8) TESTAR DUPLICIDADE DE MATRÍCULA
+# =========================================================
+
+### Criar matrícula duplicada — deve retornar erro de regra de negócio
+POST {{baseUrl}}/api/matriculas
+Content-Type: application/json
+
+{
+  "alunoId": {{alunoId}},
+  "turmaId": {{turmaId}}
+}
+
+# =========================================================
+# 9) CONFIRMAR MATRÍCULA
+# =========================================================
+
+### Confirmar matrícula
+PATCH {{baseUrl}}/api/matriculas/{{matriculaId}}/confirmar
+
+# Esperado:
+# - status da matrícula = CONFIRMADA
+# - turma.vagasOcupadas sobe para 1
+
+### Buscar matrícula após confirmação
+GET {{baseUrl}}/api/matriculas/{{matriculaId}}
+
+### Buscar turma após confirmação
+GET {{baseUrl}}/api/turmas/{{turmaId}}
+
+# =========================================================
+# 10) TESTAR CONFIRMAÇÃO DUPLA
+# =========================================================
+
+### Confirmar matrícula já confirmada — deve retornar erro de regra de negócio
+PATCH {{baseUrl}}/api/matriculas/{{matriculaId}}/confirmar
+
+# =========================================================
+# 11) CANCELAR MATRÍCULA CONFIRMADA
+# =========================================================
+
+### Cancelar matrícula confirmada
+PATCH {{baseUrl}}/api/matriculas/{{matriculaId}}/cancelar
+
+# Esperado:
+# - status da matrícula = CANCELADA
+# - turma.vagasOcupadas desce para 0
+
+### Buscar matrícula após cancelamento
+GET {{baseUrl}}/api/matriculas/{{matriculaId}}
+
+### Buscar turma após cancelamento
+GET {{baseUrl}}/api/turmas/{{turmaId}}
+
+# =========================================================
+# 12) TESTAR CANCELAMENTO DUPLO
+# =========================================================
+
+### Cancelar matrícula já cancelada — deve retornar erro de regra de negócio
+PATCH {{baseUrl}}/api/matriculas/{{matriculaId}}/cancelar
+
+# =========================================================
+# 13) TESTAR CONFIRMAÇÃO DE MATRÍCULA CANCELADA
+# =========================================================
+
+### Confirmar matrícula cancelada — deve retornar erro de regra de negócio
+PATCH {{baseUrl}}/api/matriculas/{{matriculaId}}/confirmar
+
+# =========================================================
+# 14) TESTAR TURMA FECHADA
+# =========================================================
+
+### Fechar turma
+PATCH {{baseUrl}}/api/turmas/{{turmaId}}/fechar
+
+### Buscar turma fechada
+GET {{baseUrl}}/api/turmas/{{turmaId}}
+
+### Criar segunda matrícula em turma fechada — deve retornar erro de regra de negócio
+POST {{baseUrl}}/api/matriculas
+Content-Type: application/json
+
+{
+  "alunoId": {{alunoId}},
+  "turmaId": {{turmaId}}
+}
+
+### Abrir turma novamente
+PATCH {{baseUrl}}/api/turmas/{{turmaId}}/abrir
+
+# =========================================================
+# 15) TESTAR TURMA SEM VAGA
+# =========================================================
+
+# Vamos criar um segundo aluno e preencher a única vaga da turma.
+
+### Criar segundo aluno
+POST {{baseUrl}}/api/alunos
+Content-Type: application/json
+
+{
+  "nome": "Segundo Aluno Matrícula Teste",
+  "email": "segundo.aluno.matricula.teste@email.com"
+}
+
+# Copie o id retornado e use no bloco abaixo manualmente.
+
+### Criar matrícula do segundo aluno
+POST {{baseUrl}}/api/matriculas
+Content-Type: application/json
+
+{
+  "alunoId": 2,
+  "turmaId": {{turmaId}}
+}
+
+# Substitua 9999 pelo id real do segundo aluno.
+
+### Confirmar matrícula do segundo aluno
+PATCH {{baseUrl}}/api/matriculas/2/confirmar
+
+# Substitua 9999 pelo id real da matrícula criada acima.
+
+### Buscar turma após lotar a vaga
+GET {{baseUrl}}/api/turmas/{{turmaId}}
+
+# Agora criaremos um terceiro aluno e tentaremos confirmar matrícula sem vaga.
+
+### Criar terceiro aluno
+POST {{baseUrl}}/api/alunos
+Content-Type: application/json
+
+{
+  "nome": "Terceiro Aluno Matrícula Teste",
+  "email": "terceiro.aluno.matricula.teste@email.com"
+}
+
+# Copie o id retornado e use no bloco abaixo manualmente.
+
+### Criar matrícula do terceiro aluno
+POST {{baseUrl}}/api/matriculas
+Content-Type: application/json
+
+{
+  "alunoId": 3,
+  "turmaId": {{turmaId}}
+}
+
+# Substitua 9999 pelo id real do terceiro aluno.
+
+### Criar matrícula em turma completa — deve retornar erro de regra de negócio
+POST {{baseUrl}}/api/matriculas
+Content-Type: application/json
+
+{
+  "alunoId": 3,
+  "turmaId": {{turmaId}}
+}
+
+### Confirmar matrícula sem vaga — deve retornar erro de regra de negócio
+PATCH {{baseUrl}}/api/matriculas/9999/confirmar
+
+# Substitua 9999 pelo id real da matrícula do terceiro aluno.
+
+# =========================================================
+# 16) TESTES DE VALIDAÇÃO E 404
+# =========================================================
+
+### Criar matrícula com aluno nulo — deve retornar erro de validação
+POST {{baseUrl}}/api/matriculas
+Content-Type: application/json
+
+{
+  "alunoId": null,
+  "turmaId": {{turmaId}}
+}
+
+### Criar matrícula com turma nula — deve retornar erro de validação
+POST {{baseUrl}}/api/matriculas
+Content-Type: application/json
+
+{
+  "alunoId": {{alunoId}},
+  "turmaId": null
+}
+
+### Criar matrícula com aluno inexistente — deve retornar 404
+POST {{baseUrl}}/api/matriculas
+Content-Type: application/json
+
+{
+  "alunoId": 999999,
+  "turmaId": {{turmaId}}
+}
+
+### Criar matrícula com turma inexistente — deve retornar 404
+POST {{baseUrl}}/api/matriculas
+Content-Type: application/json
+
+{
+  "alunoId": {{alunoId}},
+  "turmaId": 999999
+}
+
+### Buscar matrícula inexistente — deve retornar 404
+GET {{baseUrl}}/api/matriculas/999999
+
+### Listar matrículas de aluno inexistente — deve retornar 404
+GET {{baseUrl}}/api/matriculas/aluno/999999
+
+### Listar matrículas de turma inexistente — deve retornar 404
+GET {{baseUrl}}/api/matriculas/turma/999999
+
+### Confirmar matrícula inexistente — deve retornar 404
+PATCH {{baseUrl}}/api/matriculas/999999/confirmar
+
+### Cancelar matrícula inexistente — deve retornar 404
+PATCH {{baseUrl}}/api/matriculas/999999/cancelar

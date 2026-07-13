@@ -1,0 +1,114 @@
+.container {
+  max-width: 960px;
+  margin: 32px auto;
+  font-family: Arial, sans-serif;
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+button {
+  padding: 10px 16px;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border-bottom: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.success,
+.error {
+  position: sticky;
+  top: 56px;
+  z-index: 10;
+  padding: 12px;
+  border-radius: 6px;
+  background: #fff;
+  font-weight: bold;
+}
+
+.success {
+  color: green;
+  border: 1px solid green;
+}
+
+.error {
+  color: #b00020;
+  border: 1px solid #b00020;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.tabs {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 0;
+  margin: 16px 0 24px;
+  background: white;
+  border-bottom: 1px solid #ddd;
+}
+
+.tabs button {
+  padding: 10px 16px;
+  border: 1px solid #ccc;
+  background: #f8f8f8;
+  cursor: pointer;
+}
+
+.tabs button.active {
+  font-weight: bold;
+  border-color: #333;
+  background: #eaeaea;
+}
+
+.pendente {
+  color: #8a6d00;
+  border-color: #8a6d00;
+}
+
+.confirmada {
+  color: green;
+  border-color: green;
+}
+
+.cancelada {
+  color: #b00020;
+  border-color: #b00020;
+}
