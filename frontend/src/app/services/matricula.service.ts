@@ -27,4 +27,12 @@ export class MatriculaService {
   cancelar(id: number): Observable<Matricula> {
     return this.http.patch<Matricula>(`${this.apiUrl}/${id}/cancelar`, {});
   }
+
+  listarPorAluno(alunoId: number): Observable<Matricula[]> {
+    return this.http.get<Matricula[]>(`${this.apiUrl}/aluno/${alunoId}`);
+  }
+
+  listarPorTurma(turmaId: number): Observable<Matricula[]> {
+    return this.http.get<Matricula[]>(`${this.apiUrl}/turma/${turmaId}`);
+  }
 }

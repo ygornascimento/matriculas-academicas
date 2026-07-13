@@ -63,6 +63,10 @@ novaMatricula = {
   turmaId: null as number | null
 };
 
+filtroAlunoId = null as number | null;
+filtroTurmaId = null as number | null;
+matriculasConsultadas: Matricula[] = [];
+
   mensagem = '';
   erro = '';
 
@@ -376,6 +380,57 @@ buscarCodigoTurma(turmaId: number): string {
       behavior: 'smooth'
     });
   }
+
+  consultarMatriculasPorAluno(): void {
+  this.limparMensagens();
+
+  if (this.filtroAlunoId === null) {
+    this.erro = 'Selecione um aluno para consultar.';
+    return;
+  }
+
+  this.matriculaService.listarPorAluno(this.filtroAlunoId).subscribe({
+    next: matriculas => {
+      this.matriculasConsultadas = matriculas;
+      this.mensagem = 'Consulta por aluno realizada com sucesso.';
+    },
+    error: error => {
+      this.erro = this.extrairMensagemErro(
+        error,
+        'Erro ao consultar matrículas por aluno.'
+      );
+    }
+  });
+}
+
+consultarMatriculasPorTurma(): void {
+  this.limparMensagens();
+
+  if (this.filtroTurmaId === null) {
+    this.erro = 'Selecione uma turma para consultar.';
+    return;
+  }
+
+  this.matriculaService.listarPorTurma(this.filtroTurmaId).subscribe({
+    next: matriculas => {
+      this.matriculasConsultadas = matriculas;
+      this.mensagem = 'Consulta por turma realizada com sucesso.';
+    },
+    error: error => {
+      this.erro = this.extrairMensagemErro(
+        error,
+        'Erro ao consultar matrículas por turma.'
+      );
+    }
+  });
+}
+
+limparConsultaMatriculas(): void {
+  this.filtroAlunoId = null;
+  this.filtroTurmaId = null;
+  this.matriculasConsultadas = [];
+  this.limparMensagens();
+}
 
   private limparMensagens(): void {
     this.mensagem = '';

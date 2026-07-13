@@ -390,76 +390,156 @@
 </section>
 
   <section *ngIf="abaAtual === 'consultas'">
-    <section class="card">
-      <h2>Alunos cadastrados</h2>
+  <section class="card">
+    <h2>Consultar matrículas</h2>
 
-      <p *ngIf="alunos.length === 0">Nenhum aluno cadastrado.</p>
+    <div class="form-group">
+      <label for="consulta-aluno">Consultar por aluno</label>
+      <select
+        id="consulta-aluno"
+        name="consulta-aluno"
+        [(ngModel)]="filtroAlunoId"
+      >
+        <option [ngValue]="null">Selecione um aluno</option>
 
-      <table *ngIf="alunos.length > 0">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nome</th>
-            <th>E-mail</th>
-          </tr>
-        </thead>
+        <option *ngFor="let aluno of alunos" [ngValue]="aluno.id">
+          {{ aluno.id }} - {{ aluno.nome }}
+        </option>
+      </select>
+    </div>
 
-        <tbody>
-          <tr *ngFor="let aluno of alunos">
-            <td>{{ aluno.id }}</td>
-            <td>{{ aluno.nome }}</td>
-            <td>{{ aluno.email }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
+    <button type="button" (click)="consultarMatriculasPorAluno()">
+      Consultar por aluno
+    </button>
 
-    <section class="card">
-      <h2>Cursos cadastrados</h2>
+    <hr>
 
-      <p *ngIf="cursos.length === 0">Nenhum curso cadastrado.</p>
+    <div class="form-group">
+      <label for="consulta-turma">Consultar por turma</label>
+      <select
+        id="consulta-turma"
+        name="consulta-turma"
+        [(ngModel)]="filtroTurmaId"
+      >
+        <option [ngValue]="null">Selecione uma turma</option>
 
-      <table *ngIf="cursos.length > 0">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Descrição</th>
-          </tr>
-        </thead>
+        <option *ngFor="let turma of turmas" [ngValue]="turma.id">
+          {{ turma.id }} - {{ turma.codigo }}
+        </option>
+      </select>
+    </div>
 
-        <tbody>
-          <tr *ngFor="let curso of cursos">
-            <td>{{ curso.id }}</td>
-            <td>{{ curso.nome }}</td>
-            <td>{{ curso.descricao }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
+    <button type="button" (click)="consultarMatriculasPorTurma()">
+      Consultar por turma
+    </button>
 
-    <section class="card">
-      <h2>Disciplinas cadastradas</h2>
+    <button type="button" (click)="limparConsultaMatriculas()">
+      Limpar consulta
+    </button>
+  </section>
 
-      <p *ngIf="disciplinas.length === 0">Nenhuma disciplina cadastrada.</p>
+  <section class="card">
+    <h2>Resultado da consulta</h2>
 
-      <table *ngIf="disciplinas.length > 0">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Carga horária</th>
-          </tr>
-        </thead>
+    <p *ngIf="matriculasConsultadas.length === 0">
+      Nenhuma matrícula encontrada para a consulta atual.
+    </p>
 
-        <tbody>
-          <tr *ngFor="let disciplina of disciplinas">
-            <td>{{ disciplina.id }}</td>
-            <td>{{ disciplina.nome }}</td>
-            <td>{{ disciplina.cargaHoraria }}h</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
+    <table *ngIf="matriculasConsultadas.length > 0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Aluno</th>
+          <th>Turma</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let matricula of matriculasConsultadas">
+          <td>{{ matricula.id }}</td>
+          <td>{{ buscarNomeAluno(matricula.alunoId) }}</td>
+          <td>{{ buscarCodigoTurma(matricula.turmaId) }}</td>
+          <td>
+            <span class="status" [ngClass]="matricula.status.toLowerCase()">
+              {{ matricula.status }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Alunos cadastrados</h2>
+
+    <p *ngIf="alunos.length === 0">Nenhum aluno cadastrado.</p>
+
+    <table *ngIf="alunos.length > 0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>E-mail</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let aluno of alunos">
+          <td>{{ aluno.id }}</td>
+          <td>{{ aluno.nome }}</td>
+          <td>{{ aluno.email }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Cursos cadastrados</h2>
+
+    <p *ngIf="cursos.length === 0">Nenhum curso cadastrado.</p>
+
+    <table *ngIf="cursos.length > 0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Descrição</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let curso of cursos">
+          <td>{{ curso.id }}</td>
+          <td>{{ curso.nome }}</td>
+          <td>{{ curso.descricao }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Disciplinas cadastradas</h2>
+
+    <p *ngIf="disciplinas.length === 0">Nenhuma disciplina cadastrada.</p>
+
+    <table *ngIf="disciplinas.length > 0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Carga horária</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let disciplina of disciplinas">
+          <td>{{ disciplina.id }}</td>
+          <td>{{ disciplina.nome }}</td>
+          <td>{{ disciplina.cargaHoraria }}h</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
   </section>
 </main>
