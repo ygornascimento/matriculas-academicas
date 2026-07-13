@@ -500,7 +500,7 @@ A matrícula não possui endpoint de exclusão, pois é tratada como histórico 
 
 ## Documentação complementar
 
-- [Decisões de banco de dados](./docs/database-decisions.md)
+- Decisões de banco de dados: `docs/database-decisions.md`
 - Arquivos HTTP para validação manual: `backend/http-requests`
 
 ## Uso de IA no desenvolvimento
