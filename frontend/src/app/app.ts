@@ -6,11 +6,13 @@ import { Aluno } from './models/aluno.model';
 import { Curso } from './models/curso.model';
 import { Disciplina } from './models/disciplina.model';
 import { CursoDisciplina } from './models/curso-disciplina.model';
+import { Turma } from './models/turma.model';
 
 import { AlunoService } from './services/aluno.service';
 import { CursoService } from './services/curso.service';
 import { DisciplinaService } from './services/disciplina.service';
 import { CursoDisciplinaService } from './services/curso-disciplina.service';
+import { TurmaService } from './services/turma.service';
 
 @Component({
   selector: 'app-root',
@@ -24,6 +26,7 @@ export class App implements OnInit {
   cursos: Curso[] = [];
   disciplinas: Disciplina[] = [];
   cursoDisciplinas: CursoDisciplina[] = [];
+  turmas: Turma[] = [];
 
   novoAluno = {
     nome: '',
@@ -41,20 +44,28 @@ export class App implements OnInit {
   };
 
   novaAssociacao = {
-  cursoId: null as number | null,
-  disciplinaId: null as number | null
+    cursoId: null as number | null,
+    disciplinaId: null as number | null
   };
 
+  novaTurma = {
+    cursoDisciplinaId: null as number | null,
+    codigo: '',
+    periodo: '',
+    limiteVagas: null as number | null
+  };
 
   mensagem = '';
   erro = '';
+
   abaAtual: 'cadastros' | 'estrutura' | 'matriculas' | 'consultas' = 'cadastros';
 
   constructor(
     private readonly alunoService: AlunoService,
     private readonly cursoService: CursoService,
     private readonly disciplinaService: DisciplinaService,
-    private readonly cursoDisciplinaService: CursoDisciplinaService
+    private readonly cursoDisciplinaService: CursoDisciplinaService,
+    private readonly turmaService: TurmaService
   ) {}
 
   ngOnInit(): void {
@@ -62,6 +73,7 @@ export class App implements OnInit {
     this.carregarCursos();
     this.carregarDisciplinas();
     this.carregarCursoDisciplinas();
+    this.carregarTurmas();
   }
 
   carregarAlunos(): void {
@@ -93,6 +105,28 @@ export class App implements OnInit {
       },
       error: () => {
         this.erro = 'Erro ao carregar disciplinas.';
+      }
+    });
+  }
+
+  carregarCursoDisciplinas(): void {
+    this.cursoDisciplinaService.listar().subscribe({
+      next: cursoDisciplinas => {
+        this.cursoDisciplinas = cursoDisciplinas;
+      },
+      error: () => {
+        this.erro = 'Erro ao carregar associações entre cursos e disciplinas.';
+      }
+    });
+  }
+
+  carregarTurmas(): void {
+    this.turmaService.listar().subscribe({
+      next: turmas => {
+        this.turmas = turmas;
+      },
+      error: () => {
+        this.erro = 'Erro ao carregar turmas.';
       }
     });
   }
@@ -157,59 +191,114 @@ export class App implements OnInit {
     });
   }
 
-  carregarCursoDisciplinas(): void {
-  this.cursoDisciplinaService.listar().subscribe({
-    next: cursoDisciplinas => {
-      this.cursoDisciplinas = cursoDisciplinas;
-    },
-    error: () => {
-      this.erro = 'Erro ao carregar associações entre cursos e disciplinas.';
+  associarCursoDisciplina(): void {
+    this.limparMensagens();
+
+    this.cursoDisciplinaService.associar(this.novaAssociacao).subscribe({
+      next: () => {
+        this.mensagem = 'Disciplina associada ao curso com sucesso.';
+
+        this.novaAssociacao = {
+          cursoId: null,
+          disciplinaId: null
+        };
+
+        this.carregarCursoDisciplinas();
+      },
+      error: error => {
+        this.erro = this.extrairMensagemErro(
+          error,
+          'Erro ao associar disciplina ao curso.'
+        );
+      }
+    });
+  }
+
+  criarTurma(): void {
+    this.limparMensagens();
+
+    this.turmaService.criar(this.novaTurma).subscribe({
+      next: turma => {
+        this.mensagem = `Turma ${turma.codigo} cadastrada com sucesso.`;
+
+        this.novaTurma = {
+          cursoDisciplinaId: null,
+          codigo: '',
+          periodo: '',
+          limiteVagas: null
+        };
+
+        this.carregarTurmas();
+      },
+      error: error => {
+        this.erro = this.extrairMensagemErro(error, 'Erro ao cadastrar turma.');
+      }
+    });
+  }
+
+  abrirTurma(turmaId: number): void {
+    this.limparMensagens();
+
+    this.turmaService.abrir(turmaId).subscribe({
+      next: turma => {
+        this.mensagem = `Turma ${turma.codigo} aberta com sucesso.`;
+        this.carregarTurmas();
+      },
+      error: error => {
+        this.erro = this.extrairMensagemErro(error, 'Erro ao abrir turma.');
+      }
+    });
+  }
+
+  fecharTurma(turmaId: number): void {
+    this.limparMensagens();
+
+    this.turmaService.fechar(turmaId).subscribe({
+      next: turma => {
+        this.mensagem = `Turma ${turma.codigo} fechada com sucesso.`;
+        this.carregarTurmas();
+      },
+      error: error => {
+        this.erro = this.extrairMensagemErro(error, 'Erro ao fechar turma.');
+      }
+    });
+  }
+
+  buscarDescricaoCursoDisciplina(cursoDisciplinaId: number): string {
+    const associacao = this.cursoDisciplinas.find(
+      cursoDisciplina => cursoDisciplina.id === cursoDisciplinaId
+    );
+
+    if (!associacao) {
+      return `Associação ${cursoDisciplinaId}`;
     }
-  });
-}
 
-associarCursoDisciplina(): void {
-  this.limparMensagens();
+    const curso = this.buscarNomeCurso(associacao.cursoId);
+    const disciplina = this.buscarNomeDisciplina(associacao.disciplinaId);
 
-  this.cursoDisciplinaService.associar(this.novaAssociacao).subscribe({
-    next: () => {
-      this.mensagem = 'Disciplina associada ao curso com sucesso.';
+    return `${curso} / ${disciplina}`;
+  }
 
-      this.novaAssociacao = {
-        cursoId: null,
-        disciplinaId: null
-      };
+  buscarNomeCurso(cursoId: number): string {
+    return this.cursos.find(curso => curso.id === cursoId)?.nome ?? `Curso ${cursoId}`;
+  }
 
-      this.carregarCursoDisciplinas();
-    },
-    error: error => {
-      this.erro = this.extrairMensagemErro(
-        error,
-        'Erro ao associar disciplina ao curso.'
-      );
-    }
-  });
-}
+  buscarNomeDisciplina(disciplinaId: number): string {
+    return this.disciplinas.find(disciplina => disciplina.id === disciplinaId)?.nome ?? `Disciplina ${disciplinaId}`;
+  }
 
-buscarNomeCurso(cursoId: number): string {
-  return this.cursos.find(curso => curso.id === cursoId)?.nome ?? `Curso ${cursoId}`;
-}
+  alterarAba(aba: 'cadastros' | 'estrutura' | 'matriculas' | 'consultas'): void {
+    this.abaAtual = aba;
 
-buscarNomeDisciplina(disciplinaId: number): string {
-  return this.disciplinas.find(disciplina => disciplina.id === disciplinaId)?.nome ?? `Disciplina ${disciplinaId}`;
-}
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }
 
   private limparMensagens(): void {
     this.mensagem = '';
     this.erro = '';
-  }
-
-  alterarAba(aba: 'cadastros' | 'estrutura' | 'matriculas' | 'consultas'): void {
-  this.abaAtual = aba;
-    window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-    });
   }
 
   private extrairMensagemErro(error: any, mensagemPadrao: string): string {

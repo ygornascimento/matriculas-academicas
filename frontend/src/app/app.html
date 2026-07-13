@@ -122,9 +122,6 @@
         <button type="submit">Cadastrar disciplina</button>
       </form>
     </section>
-
-
- 
   </section>
 
   <section *ngIf="abaAtual === 'estrutura'">
@@ -191,6 +188,115 @@
         </tbody>
       </table>
     </section>
+
+    <section class="card">
+      <h2>Cadastrar turma</h2>
+
+      <form (ngSubmit)="criarTurma()">
+        <div class="form-group">
+          <label for="turma-curso-disciplina">Curso / Disciplina</label>
+          <select
+            id="turma-curso-disciplina"
+            name="turma-curso-disciplina"
+            [(ngModel)]="novaTurma.cursoDisciplinaId"
+          >
+            <option [ngValue]="null">Selecione uma associação</option>
+
+            <option
+              *ngFor="let cursoDisciplina of cursoDisciplinas"
+              [ngValue]="cursoDisciplina.id"
+            >
+              {{ cursoDisciplina.id }} -
+              {{ buscarNomeCurso(cursoDisciplina.cursoId) }} /
+              {{ buscarNomeDisciplina(cursoDisciplina.disciplinaId) }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="turma-codigo">Código</label>
+          <input
+            id="turma-codigo"
+            name="turma-codigo"
+            type="text"
+            [(ngModel)]="novaTurma.codigo"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="turma-periodo">Período</label>
+          <input
+            id="turma-periodo"
+            name="turma-periodo"
+            type="text"
+            placeholder="Ex.: 2026.2"
+            [(ngModel)]="novaTurma.periodo"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="turma-limite-vagas">Limite de vagas</label>
+          <input
+            id="turma-limite-vagas"
+            name="turma-limite-vagas"
+            type="number"
+            [(ngModel)]="novaTurma.limiteVagas"
+          >
+        </div>
+
+        <button type="submit">Cadastrar turma</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Turmas cadastradas</h2>
+
+      <p *ngIf="turmas.length === 0">Nenhuma turma cadastrada.</p>
+
+      <table *ngIf="turmas.length > 0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Curso / Disciplina</th>
+            <th>Código</th>
+            <th>Período</th>
+            <th>Vagas</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let turma of turmas">
+            <td>{{ turma.id }}</td>
+            <td>{{ buscarDescricaoCursoDisciplina(turma.cursoDisciplinaId) }}</td>
+            <td>{{ turma.codigo }}</td>
+            <td>{{ turma.periodo }}</td>
+            <td>{{ turma.vagasOcupadas }} / {{ turma.limiteVagas }}</td>
+            <td>
+              <span class="status" [ngClass]="turma.status.toLowerCase()">
+                {{ turma.status }}
+              </span>
+            </td>
+            <td>
+              <button
+                *ngIf="turma.status === 'FECHADA'"
+                type="button"
+                (click)="abrirTurma(turma.id)">
+                Abrir
+              </button>
+
+              <button
+                *ngIf="turma.status !== 'FECHADA'"
+                type="button"
+                (click)="fecharTurma(turma.id)">
+                Fechar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
   </section>
 
   <section *ngIf="abaAtual === 'matriculas'">
@@ -201,7 +307,7 @@
   </section>
 
   <section *ngIf="abaAtual === 'consultas'">
-     <section class="card">
+    <section class="card">
       <h2>Alunos cadastrados</h2>
 
       <p *ngIf="alunos.length === 0">Nenhum aluno cadastrado.</p>
