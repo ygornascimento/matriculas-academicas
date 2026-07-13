@@ -7,12 +7,14 @@ import { Curso } from './models/curso.model';
 import { Disciplina } from './models/disciplina.model';
 import { CursoDisciplina } from './models/curso-disciplina.model';
 import { Turma } from './models/turma.model';
+import { Matricula } from './models/matricula.model';
 
 import { AlunoService } from './services/aluno.service';
 import { CursoService } from './services/curso.service';
 import { DisciplinaService } from './services/disciplina.service';
 import { CursoDisciplinaService } from './services/curso-disciplina.service';
 import { TurmaService } from './services/turma.service';
+import { MatriculaService } from './services/matricula.service';
 
 @Component({
   selector: 'app-root',
@@ -27,6 +29,7 @@ export class App implements OnInit {
   disciplinas: Disciplina[] = [];
   cursoDisciplinas: CursoDisciplina[] = [];
   turmas: Turma[] = [];
+  matriculas: Matricula[] = [];
 
   novoAluno = {
     nome: '',
@@ -55,6 +58,11 @@ export class App implements OnInit {
     limiteVagas: null as number | null
   };
 
+novaMatricula = {
+  alunoId: null as number | null,
+  turmaId: null as number | null
+};
+
   mensagem = '';
   erro = '';
 
@@ -65,7 +73,8 @@ export class App implements OnInit {
     private readonly cursoService: CursoService,
     private readonly disciplinaService: DisciplinaService,
     private readonly cursoDisciplinaService: CursoDisciplinaService,
-    private readonly turmaService: TurmaService
+    private readonly turmaService: TurmaService,
+    private readonly matriculaService: MatriculaService
   ) {}
 
   ngOnInit(): void {
@@ -74,6 +83,7 @@ export class App implements OnInit {
     this.carregarDisciplinas();
     this.carregarCursoDisciplinas();
     this.carregarTurmas();
+    this.carregarMatriculas();
   }
 
   carregarAlunos(): void {
@@ -263,6 +273,77 @@ export class App implements OnInit {
       }
     });
   }
+
+  carregarMatriculas(): void {
+  this.matriculaService.listar().subscribe({
+    next: matriculas => {
+      this.matriculas = matriculas;
+    },
+    error: () => {
+      this.erro = 'Erro ao carregar matrículas.';
+    }
+  });
+}
+
+criarMatricula(): void {
+  this.limparMensagens();
+
+  this.matriculaService.criar(this.novaMatricula).subscribe({
+    next: matricula => {
+      this.mensagem = `Matrícula ${matricula.id} criada com sucesso.`;
+
+      this.novaMatricula = {
+        alunoId: null,
+        turmaId: null
+      };
+
+      this.carregarMatriculas();
+    },
+    error: error => {
+      this.erro = this.extrairMensagemErro(error, 'Erro ao criar matrícula.');
+    }
+  });
+}
+
+confirmarMatricula(matriculaId: number): void {
+  this.limparMensagens();
+
+  this.matriculaService.confirmar(matriculaId).subscribe({
+    next: matricula => {
+      this.mensagem = `Matrícula ${matricula.id} confirmada com sucesso.`;
+
+      this.carregarMatriculas();
+      this.carregarTurmas();
+    },
+    error: error => {
+      this.erro = this.extrairMensagemErro(error, 'Erro ao confirmar matrícula.');
+    }
+  });
+}
+
+cancelarMatricula(matriculaId: number): void {
+  this.limparMensagens();
+
+  this.matriculaService.cancelar(matriculaId).subscribe({
+    next: matricula => {
+      this.mensagem = `Matrícula ${matricula.id} cancelada com sucesso.`;
+
+      this.carregarMatriculas();
+      this.carregarTurmas();
+    },
+    error: error => {
+      this.erro = this.extrairMensagemErro(error, 'Erro ao cancelar matrícula.');
+    }
+  });
+}
+
+buscarNomeAluno(alunoId: number): string {
+  return this.alunos.find(aluno => aluno.id === alunoId)?.nome ?? `Aluno ${alunoId}`;
+}
+
+buscarCodigoTurma(turmaId: number): string {
+  return this.turmas.find(turma => turma.id === turmaId)?.codigo ?? `Turma ${turmaId}`;
+}
 
   buscarDescricaoCursoDisciplina(cursoDisciplinaId: number): string {
     const associacao = this.cursoDisciplinas.find(

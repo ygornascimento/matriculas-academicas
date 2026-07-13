@@ -96,3 +96,18 @@ select {
   border-color: #333;
   background: #eaeaea;
 }
+
+.pendente {
+  color: #8a6d00;
+  border-color: #8a6d00;
+}
+
+.confirmada {
+  color: green;
+  border-color: green;
+}
+
+.cancelada {
+  color: #b00020;
+  border-color: #b00020;
+}

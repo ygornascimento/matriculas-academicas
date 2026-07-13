@@ -299,12 +299,95 @@
     </section>
   </section>
 
-  <section *ngIf="abaAtual === 'matriculas'">
-    <section class="card">
-      <h2>Matrículas</h2>
-      <p>Fluxo de matrícula será adicionado aqui.</p>
-    </section>
+<section *ngIf="abaAtual === 'matriculas'">
+  <section class="card">
+    <h2>Criar matrícula</h2>
+
+    <form (ngSubmit)="criarMatricula()">
+      <div class="form-group">
+        <label for="matricula-aluno">Aluno</label>
+        <select
+          id="matricula-aluno"
+          name="matricula-aluno"
+          [(ngModel)]="novaMatricula.alunoId"
+        >
+          <option [ngValue]="null">Selecione um aluno</option>
+
+          <option *ngFor="let aluno of alunos" [ngValue]="aluno.id">
+            {{ aluno.id }} - {{ aluno.nome }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="matricula-turma">Turma</label>
+        <select
+          id="matricula-turma"
+          name="matricula-turma"
+          [(ngModel)]="novaMatricula.turmaId"
+        >
+          <option [ngValue]="null">Selecione uma turma</option>
+
+          <option *ngFor="let turma of turmas" [ngValue]="turma.id">
+            {{ turma.id }} - {{ turma.codigo }}
+            | {{ turma.status }}
+            | vagas {{ turma.vagasOcupadas }}/{{ turma.limiteVagas }}
+          </option>
+        </select>
+      </div>
+
+      <button type="submit">Criar matrícula</button>
+    </form>
   </section>
+
+  <section class="card">
+    <h2>Matrículas cadastradas</h2>
+
+    <p *ngIf="matriculas.length === 0">Nenhuma matrícula cadastrada.</p>
+
+    <table *ngIf="matriculas.length > 0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Aluno</th>
+          <th>Turma</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let matricula of matriculas">
+          <td>{{ matricula.id }}</td>
+          <td>{{ buscarNomeAluno(matricula.alunoId) }}</td>
+          <td>{{ buscarCodigoTurma(matricula.turmaId) }}</td>
+          <td>
+            <span class="status" [ngClass]="matricula.status.toLowerCase()">
+              {{ matricula.status }}
+            </span>
+          </td>
+          <td>
+            <button
+              *ngIf="matricula.status === 'PENDENTE'"
+              type="button"
+              (click)="confirmarMatricula(matricula.id)"
+            >
+              Confirmar
+            </button>
+
+            <button
+              *ngIf="matricula.status !== 'CANCELADA'"
+              type="button"
+              (click)="cancelarMatricula(matricula.id)"
+            >
+              Cancelar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</section>
 
   <section *ngIf="abaAtual === 'consultas'">
     <section class="card">
