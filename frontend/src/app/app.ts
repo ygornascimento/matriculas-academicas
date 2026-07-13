@@ -70,7 +70,14 @@ matriculasConsultadas: Matricula[] = [];
   mensagem = '';
   erro = '';
 
-  abaAtual: 'cadastros' | 'estrutura' | 'matriculas' | 'consultas' = 'cadastros';
+abaAtual:
+  | 'cadastros'
+  | 'estrutura'
+  | 'matriculas'
+  | 'consultas'
+  | 'alunos'
+  | 'cursos'
+  | 'disciplinas' = 'cadastros';
 
   constructor(
     private readonly alunoService: AlunoService,
@@ -150,7 +157,7 @@ matriculasConsultadas: Matricula[] = [];
 
     this.alunoService.criar(this.novoAluno).subscribe({
       next: aluno => {
-        this.mensagem = `Aluno ${aluno.nome} cadastrado com sucesso.`;
+        this.exibirMensagemSucesso(`Aluno ${aluno.nome} cadastrado com sucesso.`);
 
         this.novoAluno = {
           nome: '',
@@ -170,7 +177,7 @@ matriculasConsultadas: Matricula[] = [];
 
     this.cursoService.criar(this.novoCurso).subscribe({
       next: curso => {
-        this.mensagem = `Curso ${curso.nome} cadastrado com sucesso.`;
+        this.exibirMensagemSucesso(`Curso ${curso.nome} cadastrado com sucesso.`);
 
         this.novoCurso = {
           nome: '',
@@ -190,7 +197,7 @@ matriculasConsultadas: Matricula[] = [];
 
     this.disciplinaService.criar(this.novaDisciplina).subscribe({
       next: disciplina => {
-        this.mensagem = `Disciplina ${disciplina.nome} cadastrada com sucesso.`;
+        this.exibirMensagemSucesso(`Disciplina ${disciplina.nome} cadastrada com sucesso.`);
 
         this.novaDisciplina = {
           nome: '',
@@ -210,7 +217,7 @@ matriculasConsultadas: Matricula[] = [];
 
     this.cursoDisciplinaService.associar(this.novaAssociacao).subscribe({
       next: () => {
-        this.mensagem = 'Disciplina associada ao curso com sucesso.';
+        this.exibirMensagemSucesso('Disciplina associada ao curso com sucesso.');
 
         this.novaAssociacao = {
           cursoId: null,
@@ -233,7 +240,7 @@ matriculasConsultadas: Matricula[] = [];
 
     this.turmaService.criar(this.novaTurma).subscribe({
       next: turma => {
-        this.mensagem = `Turma ${turma.codigo} cadastrada com sucesso.`;
+        this.exibirMensagemSucesso(`Turma ${turma.codigo} cadastrada com sucesso.`);
 
         this.novaTurma = {
           cursoDisciplinaId: null,
@@ -255,7 +262,7 @@ matriculasConsultadas: Matricula[] = [];
 
     this.turmaService.abrir(turmaId).subscribe({
       next: turma => {
-        this.mensagem = `Turma ${turma.codigo} aberta com sucesso.`;
+        this.exibirMensagemSucesso(`Turma ${turma.codigo} aberta com sucesso.`);
         this.carregarTurmas();
       },
       error: error => {
@@ -269,7 +276,7 @@ matriculasConsultadas: Matricula[] = [];
 
     this.turmaService.fechar(turmaId).subscribe({
       next: turma => {
-        this.mensagem = `Turma ${turma.codigo} fechada com sucesso.`;
+        this.exibirMensagemSucesso(`Turma ${turma.codigo} fechada com sucesso.`);
         this.carregarTurmas();
       },
       error: error => {
@@ -294,7 +301,7 @@ criarMatricula(): void {
 
   this.matriculaService.criar(this.novaMatricula).subscribe({
     next: matricula => {
-      this.mensagem = `Matrícula ${matricula.id} criada com sucesso.`;
+      this.exibirMensagemSucesso(`Matrícula ${matricula.id} criada com sucesso.`);
 
       this.novaMatricula = {
         alunoId: null,
@@ -314,7 +321,7 @@ confirmarMatricula(matriculaId: number): void {
 
   this.matriculaService.confirmar(matriculaId).subscribe({
     next: matricula => {
-      this.mensagem = `Matrícula ${matricula.id} confirmada com sucesso.`;
+      this.exibirMensagemSucesso(`Matrícula ${matricula.id} confirmada com sucesso.`);
 
       this.carregarMatriculas();
       this.carregarTurmas();
@@ -330,7 +337,7 @@ cancelarMatricula(matriculaId: number): void {
 
   this.matriculaService.cancelar(matriculaId).subscribe({
     next: matricula => {
-      this.mensagem = `Matrícula ${matricula.id} cancelada com sucesso.`;
+      this.exibirMensagemSucesso(`Matrícula ${matricula.id} cancelada com sucesso.`);
 
       this.carregarMatriculas();
       this.carregarTurmas();
@@ -372,14 +379,24 @@ buscarCodigoTurma(turmaId: number): string {
     return this.disciplinas.find(disciplina => disciplina.id === disciplinaId)?.nome ?? `Disciplina ${disciplinaId}`;
   }
 
-  alterarAba(aba: 'cadastros' | 'estrutura' | 'matriculas' | 'consultas'): void {
-    this.abaAtual = aba;
+alterarAba(
+  aba:
+    | 'cadastros'
+    | 'estrutura'
+    | 'matriculas'
+    | 'consultas'
+    | 'alunos'
+    | 'cursos'
+    | 'disciplinas'
+): void {
+  this.abaAtual = aba;
+  this.limparMensagens();
 
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  }
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+}
 
   consultarMatriculasPorAluno(): void {
   this.limparMensagens();
@@ -392,7 +409,7 @@ buscarCodigoTurma(turmaId: number): string {
   this.matriculaService.listarPorAluno(this.filtroAlunoId).subscribe({
     next: matriculas => {
       this.matriculasConsultadas = matriculas;
-      this.mensagem = 'Consulta por aluno realizada com sucesso.';
+      this.exibirMensagemSucesso('Consulta por aluno realizada com sucesso.');
     },
     error: error => {
       this.erro = this.extrairMensagemErro(
@@ -414,7 +431,7 @@ consultarMatriculasPorTurma(): void {
   this.matriculaService.listarPorTurma(this.filtroTurmaId).subscribe({
     next: matriculas => {
       this.matriculasConsultadas = matriculas;
-      this.mensagem = 'Consulta por turma realizada com sucesso.';
+      this.exibirMensagemSucesso('Consulta por turma realizada com sucesso.');
     },
     error: error => {
       this.erro = this.extrairMensagemErro(
@@ -432,10 +449,29 @@ limparConsultaMatriculas(): void {
   this.limparMensagens();
 }
 
-  private limparMensagens(): void {
-    this.mensagem = '';
-    this.erro = '';
+private limparMensagens(): void {
+  if (this.temporizadorMensagem) {
+    clearTimeout(this.temporizadorMensagem);
   }
+
+  this.mensagem = '';
+  this.erro = '';
+}
+
+private exibirMensagemSucesso(mensagem: string): void {
+  if (this.temporizadorMensagem) {
+    clearTimeout(this.temporizadorMensagem);
+  }
+
+  this.mensagem = mensagem;
+  this.erro = '';
+
+  this.temporizadorMensagem = setTimeout(() => {
+    this.mensagem = '';
+  }, 3000);
+}
+
+  private temporizadorMensagem?: ReturnType<typeof setTimeout>;
 
   private extrairMensagemErro(error: any, mensagemPadrao: string): string {
     if (error.error?.campos?.length > 0) {
