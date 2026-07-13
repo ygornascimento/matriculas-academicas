@@ -1,226 +1,276 @@
 <main class="container">
   <h1>Matrículas Acadêmicas</h1>
 
+  <nav class="tabs">
+    <button
+      type="button"
+      [class.active]="abaAtual === 'cadastros'"
+      (click)="alterarAba('cadastros')"
+    >
+      Cadastros
+    </button>
+
+    <button
+      type="button"
+      [class.active]="abaAtual === 'estrutura'"
+      (click)="alterarAba('estrutura')"
+    >
+      Estrutura acadêmica
+    </button>
+
+    <button
+      type="button"
+      [class.active]="abaAtual === 'matriculas'"
+      (click)="alterarAba('matriculas')"
+    >
+      Matrículas
+    </button>
+
+    <button
+      type="button"
+      [class.active]="abaAtual === 'consultas'"
+      (click)="alterarAba('consultas')"
+    >
+      Consultas
+    </button>
+  </nav>
+
   <p *ngIf="mensagem" class="success">{{ mensagem }}</p>
   <p *ngIf="erro" class="error">{{ erro }}</p>
 
-  <section class="card">
-    <h2>Cadastrar aluno</h2>
+  <section *ngIf="abaAtual === 'cadastros'">
+    <section class="card">
+      <h2>Cadastrar aluno</h2>
 
-    <form (ngSubmit)="criarAluno()">
-      <div class="form-group">
-        <label for="aluno-nome">Nome</label>
-        <input
-          id="aluno-nome"
-          name="aluno-nome"
-          type="text"
-          [(ngModel)]="novoAluno.nome"
-        >
-      </div>
+      <form (ngSubmit)="criarAluno()">
+        <div class="form-group">
+          <label for="aluno-nome">Nome</label>
+          <input
+            id="aluno-nome"
+            name="aluno-nome"
+            type="text"
+            [(ngModel)]="novoAluno.nome"
+          >
+        </div>
 
-      <div class="form-group">
-        <label for="aluno-email">E-mail</label>
-        <input
-          id="aluno-email"
-          name="aluno-email"
-          type="email"
-          [(ngModel)]="novoAluno.email"
-        >
-      </div>
+        <div class="form-group">
+          <label for="aluno-email">E-mail</label>
+          <input
+            id="aluno-email"
+            name="aluno-email"
+            type="email"
+            [(ngModel)]="novoAluno.email"
+          >
+        </div>
 
-      <button type="submit">Cadastrar aluno</button>
-    </form>
+        <button type="submit">Cadastrar aluno</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Cadastrar curso</h2>
+
+      <form (ngSubmit)="criarCurso()">
+        <div class="form-group">
+          <label for="curso-nome">Nome</label>
+          <input
+            id="curso-nome"
+            name="curso-nome"
+            type="text"
+            [(ngModel)]="novoCurso.nome"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="curso-descricao">Descrição</label>
+          <input
+            id="curso-descricao"
+            name="curso-descricao"
+            type="text"
+            [(ngModel)]="novoCurso.descricao"
+          >
+        </div>
+
+        <button type="submit">Cadastrar curso</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Cadastrar disciplina</h2>
+
+      <form (ngSubmit)="criarDisciplina()">
+        <div class="form-group">
+          <label for="disciplina-nome">Nome</label>
+          <input
+            id="disciplina-nome"
+            name="disciplina-nome"
+            type="text"
+            [(ngModel)]="novaDisciplina.nome"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="disciplina-carga-horaria">Carga horária</label>
+          <input
+            id="disciplina-carga-horaria"
+            name="disciplina-carga-horaria"
+            type="number"
+            [(ngModel)]="novaDisciplina.cargaHoraria"
+          >
+        </div>
+
+        <button type="submit">Cadastrar disciplina</button>
+      </form>
+    </section>
+
+
+ 
   </section>
 
-  <section class="card">
-    <h2>Cadastrar curso</h2>
+  <section *ngIf="abaAtual === 'estrutura'">
+    <section class="card">
+      <h2>Associar disciplina ao curso</h2>
 
-    <form (ngSubmit)="criarCurso()">
-      <div class="form-group">
-        <label for="curso-nome">Nome</label>
-        <input
-          id="curso-nome"
-          name="curso-nome"
-          type="text"
-          [(ngModel)]="novoCurso.nome"
-        >
-      </div>
+      <form (ngSubmit)="associarCursoDisciplina()">
+        <div class="form-group">
+          <label for="associacao-curso">Curso</label>
+          <select
+            id="associacao-curso"
+            name="associacao-curso"
+            [(ngModel)]="novaAssociacao.cursoId"
+          >
+            <option [ngValue]="null">Selecione um curso</option>
 
-      <div class="form-group">
-        <label for="curso-descricao">Descrição</label>
-        <input
-          id="curso-descricao"
-          name="curso-descricao"
-          type="text"
-          [(ngModel)]="novoCurso.descricao"
-        >
-      </div>
+            <option *ngFor="let curso of cursos" [ngValue]="curso.id">
+              {{ curso.id }} - {{ curso.nome }}
+            </option>
+          </select>
+        </div>
 
-      <button type="submit">Cadastrar curso</button>
-    </form>
+        <div class="form-group">
+          <label for="associacao-disciplina">Disciplina</label>
+          <select
+            id="associacao-disciplina"
+            name="associacao-disciplina"
+            [(ngModel)]="novaAssociacao.disciplinaId"
+          >
+            <option [ngValue]="null">Selecione uma disciplina</option>
+
+            <option *ngFor="let disciplina of disciplinas" [ngValue]="disciplina.id">
+              {{ disciplina.id }} - {{ disciplina.nome }}
+            </option>
+          </select>
+        </div>
+
+        <button type="submit">Associar disciplina ao curso</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Disciplinas associadas a cursos</h2>
+
+      <p *ngIf="cursoDisciplinas.length === 0">
+        Nenhuma disciplina associada a curso.
+      </p>
+
+      <table *ngIf="cursoDisciplinas.length > 0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Curso</th>
+            <th>Disciplina</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let cursoDisciplina of cursoDisciplinas">
+            <td>{{ cursoDisciplina.id }}</td>
+            <td>{{ buscarNomeCurso(cursoDisciplina.cursoId) }}</td>
+            <td>{{ buscarNomeDisciplina(cursoDisciplina.disciplinaId) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
   </section>
 
-  <section class="card">
-    <h2>Cadastrar disciplina</h2>
-
-    <form (ngSubmit)="criarDisciplina()">
-      <div class="form-group">
-        <label for="disciplina-nome">Nome</label>
-        <input
-          id="disciplina-nome"
-          name="disciplina-nome"
-          type="text"
-          [(ngModel)]="novaDisciplina.nome"
-        >
-      </div>
-
-      <div class="form-group">
-        <label for="disciplina-carga-horaria">Carga horária</label>
-        <input
-          id="disciplina-carga-horaria"
-          name="disciplina-carga-horaria"
-          type="number"
-          [(ngModel)]="novaDisciplina.cargaHoraria"
-        >
-      </div>
-
-      <button type="submit">Cadastrar disciplina</button>
-    </form>
+  <section *ngIf="abaAtual === 'matriculas'">
+    <section class="card">
+      <h2>Matrículas</h2>
+      <p>Fluxo de matrícula será adicionado aqui.</p>
+    </section>
   </section>
 
-  <section class="card">
-  <h2>Associar disciplina ao curso</h2>
+  <section *ngIf="abaAtual === 'consultas'">
+     <section class="card">
+      <h2>Alunos cadastrados</h2>
 
-  <form (ngSubmit)="associarCursoDisciplina()">
-    <div class="form-group">
-      <label for="associacao-curso">Curso</label>
-      <select
-        id="associacao-curso"
-        name="associacao-curso"
-        [(ngModel)]="novaAssociacao.cursoId"
-      >
-        <option [ngValue]="null">Selecione um curso</option>
+      <p *ngIf="alunos.length === 0">Nenhum aluno cadastrado.</p>
 
-        <option *ngFor="let curso of cursos" [ngValue]="curso.id">
-          {{ curso.id }} - {{ curso.nome }}
-        </option>
-      </select>
-    </div>
+      <table *ngIf="alunos.length > 0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>E-mail</th>
+          </tr>
+        </thead>
 
-    <div class="form-group">
-      <label for="associacao-disciplina">Disciplina</label>
-      <select
-        id="associacao-disciplina"
-        name="associacao-disciplina"
-        [(ngModel)]="novaAssociacao.disciplinaId"
-      >
-        <option [ngValue]="null">Selecione uma disciplina</option>
+        <tbody>
+          <tr *ngFor="let aluno of alunos">
+            <td>{{ aluno.id }}</td>
+            <td>{{ aluno.nome }}</td>
+            <td>{{ aluno.email }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
 
-        <option *ngFor="let disciplina of disciplinas" [ngValue]="disciplina.id">
-          {{ disciplina.id }} - {{ disciplina.nome }}
-        </option>
-      </select>
-    </div>
+    <section class="card">
+      <h2>Cursos cadastrados</h2>
 
-    <button type="submit">Associar disciplina ao curso</button>
-  </form>
-</section>
+      <p *ngIf="cursos.length === 0">Nenhum curso cadastrado.</p>
 
-<section class="card">
-  <h2>Disciplinas associadas a cursos</h2>
+      <table *ngIf="cursos.length > 0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Descrição</th>
+          </tr>
+        </thead>
 
-  <p *ngIf="cursoDisciplinas.length === 0">
-    Nenhuma disciplina associada a curso.
-  </p>
+        <tbody>
+          <tr *ngFor="let curso of cursos">
+            <td>{{ curso.id }}</td>
+            <td>{{ curso.nome }}</td>
+            <td>{{ curso.descricao }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
 
-  <table *ngIf="cursoDisciplinas.length > 0">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Curso</th>
-        <th>Disciplina</th>
-      </tr>
-    </thead>
+    <section class="card">
+      <h2>Disciplinas cadastradas</h2>
 
-    <tbody>
-      <tr *ngFor="let cursoDisciplina of cursoDisciplinas">
-        <td>{{ cursoDisciplina.id }}</td>
-        <td>{{ buscarNomeCurso(cursoDisciplina.cursoId) }}</td>
-        <td>{{ buscarNomeDisciplina(cursoDisciplina.disciplinaId) }}</td>
-      </tr>
-    </tbody>
-  </table>
-</section>
+      <p *ngIf="disciplinas.length === 0">Nenhuma disciplina cadastrada.</p>
 
-  <section class="card">
-    <h2>Alunos cadastrados</h2>
+      <table *ngIf="disciplinas.length > 0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Carga horária</th>
+          </tr>
+        </thead>
 
-    <p *ngIf="alunos.length === 0">Nenhum aluno cadastrado.</p>
-
-    <table *ngIf="alunos.length > 0">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nome</th>
-          <th>E-mail</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr *ngFor="let aluno of alunos">
-          <td>{{ aluno.id }}</td>
-          <td>{{ aluno.nome }}</td>
-          <td>{{ aluno.email }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
-
-  <section class="card">
-    <h2>Cursos cadastrados</h2>
-
-    <p *ngIf="cursos.length === 0">Nenhum curso cadastrado.</p>
-
-    <table *ngIf="cursos.length > 0">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nome</th>
-          <th>Descrição</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr *ngFor="let curso of cursos">
-          <td>{{ curso.id }}</td>
-          <td>{{ curso.nome }}</td>
-          <td>{{ curso.descricao }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
-
-  <section class="card">
-    <h2>Disciplinas cadastradas</h2>
-
-    <p *ngIf="disciplinas.length === 0">Nenhuma disciplina cadastrada.</p>
-
-    <table *ngIf="disciplinas.length > 0">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nome</th>
-          <th>Carga horária</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr *ngFor="let disciplina of disciplinas">
-          <td>{{ disciplina.id }}</td>
-          <td>{{ disciplina.nome }}</td>
-          <td>{{ disciplina.cargaHoraria }}h</td>
-        </tr>
-      </tbody>
-    </table>
+        <tbody>
+          <tr *ngFor="let disciplina of disciplinas">
+            <td>{{ disciplina.id }}</td>
+            <td>{{ disciplina.nome }}</td>
+            <td>{{ disciplina.cargaHoraria }}h</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
   </section>
 </main>

@@ -45,8 +45,10 @@ export class App implements OnInit {
   disciplinaId: null as number | null
   };
 
+
   mensagem = '';
   erro = '';
+  abaAtual: 'cadastros' | 'estrutura' | 'matriculas' | 'consultas' = 'cadastros';
 
   constructor(
     private readonly alunoService: AlunoService,
@@ -200,6 +202,14 @@ buscarNomeDisciplina(disciplinaId: number): string {
   private limparMensagens(): void {
     this.mensagem = '';
     this.erro = '';
+  }
+
+  alterarAba(aba: 'cadastros' | 'estrutura' | 'matriculas' | 'consultas'): void {
+  this.abaAtual = aba;
+    window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+    });
   }
 
   private extrairMensagemErro(error: any, mensagemPadrao: string): string {
