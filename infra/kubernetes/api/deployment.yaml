@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: matriculas-api
-          image: matriculas-api:1.0.0
+          image: matriculas-api:1.0.1
           imagePullPolicy: IfNotPresent
 
           ports:
@@ -32,6 +32,30 @@ spec:
                 name: api-config
             - secretRef:
                 name: api-secret
+          
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            periodSeconds: 5
+            failureThreshold: 12
+            timeoutSeconds: 2
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            periodSeconds: 5
+            failureThreshold: 3
+            timeoutSeconds: 2
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 2
 
           resources:
             requests:
