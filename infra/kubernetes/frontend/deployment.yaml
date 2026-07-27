@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: matriculas-frontend
+  namespace: matriculas
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: matriculas-frontend
+
+  template:
+    metadata:
+      labels:
+        app: matriculas-frontend
+
+    spec:
+      containers:
+        - name: matriculas-frontend
+          image: matriculas-frontend:1.0.0
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - name: http
+              containerPort: 80
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+
+            limits:
+              cpu: 500m
+              memory: 256Mi

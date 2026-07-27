@@ -1,0 +1,12 @@
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshot
+
+metadata:
+  name: postgres-snapshot-20260727
+  namespace: matriculas
+
+spec:
+  volumeSnapshotClassName: csi-hostpath-snapclass
+
+  source:
+    persistentVolumeClaimName: postgres-data-postgres-0

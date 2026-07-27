@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  name: matriculas
+  namespace: matriculas
+
+spec:
+  ingressClassName: nginx
+
+  rules:
+    - host: matriculas.local
+
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+
+            backend:
+              service:
+                name: matriculas-frontend
+                port:
+                  number: 80
